@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>可视化 4 — Temperature 对输出的影响</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1c1c1c;
+      font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+    }
+    a.nav-back {
+      position: fixed; top: 16px; left: 16px;
+      text-decoration: none; color: #888; font-size: 14px;
+    }
+    a.nav-back:hover { color: #FC6255; }
+    h1 { font-size: 22px; font-weight: 300; margin: 0 0 6px; color: #ccc; }
+    .subtitle { font-size: 13px; color: #666; margin-bottom: 24px; }
+
+    .main-layout {
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .left-panel {
+      flex: 1;
+      background: #222;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 28px;
+    }
+
+    .slider-section {
+      margin-bottom: 28px;
+    }
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .slider-label span { font-size: 14px; color: #aaa; }
+    .temp-value {
+      font-size: 36px;
+      font-weight: 200;
+      color: #FC6255;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      -webkit-appearance: none;
+      height: 6px;
+      background: linear-gradient(to right, #58C4DD, #FC6255);
+      border-radius: 3px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px; height: 22px;
+      background: #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    .description {
+      font-size: 14px;
+      color: #888;
+      line-height: 1.7;
+      padding: 16px;
+      background: #282828;
+      border-radius: 8px;
+      border-left: 3px solid #FC6255;
+      min-height: 80px;
+    }
+
+    .right-panel {
+      width: 400px;
+    }
+    .prob-title {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 16px;
+    }
+    .prob-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      height: 36px;
+    }
+    .prob-word {
+      width: 50px;
+      text-align: right;
+      font-size: 18px;
+      color: #ccc;
+      flex-shrink: 0;
+    }
+    .prob-bar-bg {
+      flex: 1;
+      height: 28px;
+      background: #333;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .prob-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  background-color 0.4s;
+    }
+    .prob-pct {
+      width: 52px;
+      font-size: 14px;
+      color: #aaa;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .prompt-context {
+      margin-top: 24px;
+      padding: 16px;
+      background: #282828;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .prompt-context .label { color: #666; font-size: 12px; margin-bottom: 8px; }
+    .prompt-text { color: #ccc; font-size: 16px; }
+    .prompt-cursor {
+      display: inline-block;
+      width: 2px; height: 18px;
+      background: #58C4DD;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .presets {
+      margin-top: 16px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .preset-btn {
+      padding: 6px 14px;
+      background: #333;
+      border: 1px solid #444;
+      border-radius: 20px;
+      color: #aaa;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .preset-btn:hover { border-color: #FC6255; color: #fff; }
+    .preset-btn.active { border-color: #FC6255; color: #FC6255; background: rgba(252,98,85,0.1); }
+  </style>
+</head>
+<body>
+  <a class="nav-back" href="../../index.html">← 返回目录</a>
+  <h1>Temperature 对输出的影响</h1>
+  <p class="subtitle">Softmax + Temperature：从确定到随机</p>
+
+  <div class="main-layout">
+    <div class="left-panel">
+      <div class="slider-section">
+        <div class="slider-label">
+          <span>Temperature</span>
+          <span class="temp-value" id="tempDisplay">1.0</span>
+        </div>
+        <input type="range" id="tempSlider" min="0.01" max="3" step="0.01" value="1.0">
+        <div class="range-labels">
+          <span>0 — 最确定</span>
+          <span>1.0 — 标准</span>
+          <span>3.0 — 最随机</span>
+        </div>
+      </div>
+
+      <div class="presets">
+        <button class="preset-btn" data-temp="0.01">T≈0 确定性</button>
+        <button class="preset-btn" data-temp="0.3">T=0.3 保守</button>
+        <button class="preset-btn active" data-temp="1.0">T=1.0 标准</button>
+        <button class="preset-btn" data-temp="1.5">T=1.5 创意</button>
+        <button class="preset-btn" data-temp="3.0">T=3.0 混乱</button>
+      </div>
+
+      <div class="description" id="description">
+        标准温度。模型在高概率词和低概率词之间取得平衡，生成自然流畅的文本。
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <div class="prompt-context">
+        <div class="label">输入 Prompt</div>
+        <div class="prompt-text">从前有一座<span class="prompt-cursor"></span></div>
+      </div>
+      <div style="margin-top: 20px;">
+        <div class="prob-title">经 Softmax(T) 后的概率分布</div>
+        <div id="probBars"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

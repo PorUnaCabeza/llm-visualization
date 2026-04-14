@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM 可视化 — 3Blue1Brown 风格</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1c1c1c;
+      font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .hero { text-align: center; margin-bottom: 60px; }
+    .hero h1 {
+      font-size: 42px;
+      font-weight: 200;
+      letter-spacing: 4px;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #58C4DD, #83C167);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p { font-size: 16px; color: #888; font-weight: 300; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      max-width: 1000px;
+      width: 100%;
+    }
+    .card {
+      background: #252525;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 32px 28px;
+      text-decoration: none;
+      color: #fff;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+    }
+    .card:hover {
+      border-color: #555;
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    .card .num {
+      font-size: 48px;
+      font-weight: 100;
+      color: var(--accent);
+      opacity: 0.6;
+      margin-bottom: 8px;
+    }
+    .card h2 { font-size: 20px; font-weight: 400; margin-bottom: 12px; }
+    .card p { font-size: 14px; color: #999; line-height: 1.6; }
+    .card .tag {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      background: rgba(255,255,255,0.06);
+      color: #aaa;
+    }
+    .footer {
+      margin-top: 60px;
+      font-size: 13px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>大语言模型可视化</h1>
+    <p>配合演讲科普环节 · 3Blue1Brown 风格 · 可交互</p>
+  </div>
+
+  <div class="grid">
+    <a class="card" href="./src/viz1-next-word/index.html" style="--accent: #58C4DD;">
+      <div class="num">01</div>
+      <h2>下一个词预测循环</h2>
+      <p>直观展示"AI 就是在一个词一个词地猜"——逐词出现的文本 + 实时概率分布柱状图</p>
+      <span class="tag">自动播放动画</span>
+    </a>
+
+    <a class="card" href="./src/viz2-word-vectors/index.html" style="--accent: #83C167;">
+      <div class="num">02</div>
+      <h2>词向量空间</h2>
+      <p>50 个中文词在高维空间中的投影——相似的词靠得近，不同类别形成清晰的簇</p>
+      <span class="tag">可交互 3D 散点图</span>
+    </a>
+
+    <a class="card" href="./src/viz3-vector-arithmetic/index.html" style="--accent: #F4D03F;">
+      <div class="num">03</div>
+      <h2>King − Man + Woman = Queen</h2>
+      <p>词向量的算术运算——展示"词之间的方向关系编码了语义"这一神奇现象</p>
+      <span class="tag">分步动画</span>
+    </a>
+
+    <a class="card" href="./src/viz4-temperature/index.html" style="--accent: #FC6255;">
+      <div class="num">04</div>
+      <h2>Temperature 对输出的影响</h2>
+      <p>拖动滑块改变温度，实时观察概率分布从"确定性"到"随机性"的变化</p>
+      <span class="tag">可交互</span>
+    </a>
+    <a class="card" href="./src/viz5-transformer-anatomy/index.html" style="--accent: #7799CC;">
+      <div class="num">05</div>
+      <h2>Transformer 结构解剖</h2>
+      <p>3D 拆解 LLM 内部：Token → Embedding → Attention → Feedforward → 概率输出</p>
+      <span class="tag">3D 分步动画</span>
+    </a>
+  </div>
+
+  <div class="footer">基于 manim-web · 深色背景 · 柔和彩色高亮 · 动画流畅缓动</div>
+</body>
+</html>

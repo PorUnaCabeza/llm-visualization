@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>可视化 1 — 下一个词预测循环</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1c1c1c;
+      font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    a.nav-back {
+      position: fixed; top: 16px; left: 16px;
+      text-decoration: none; color: #888; font-size: 14px;
+      transition: color 0.2s;
+    }
+    a.nav-back:hover { color: #58C4DD; }
+    h1 {
+      font-size: 22px; font-weight: 300; margin: 20px 0 6px;
+      color: #ccc; letter-spacing: 1px;
+    }
+    .subtitle { font-size: 13px; color: #666; margin-bottom: 20px; }
+
+    .viz-wrapper {
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+      padding: 40px;
+      background: #222;
+      border-radius: 12px;
+      border: 1px solid #333;
+      min-width: 800px;
+    }
+
+    .text-area {
+      flex: 1;
+      min-width: 340px;
+    }
+    .text-content {
+      font-size: 32px;
+      line-height: 1.6;
+      color: #eee;
+      min-height: 120px;
+      position: relative;
+    }
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 36px;
+      background: #58C4DD;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+      margin-left: 2px;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .word-highlight {
+      color: #58C4DD;
+      transition: color 0.3s;
+    }
+    .word-flash {
+      animation: flash 0.6s ease-out;
+    }
+    @keyframes flash {
+      0% { text-shadow: 0 0 20px #58C4DD, 0 0 40px #58C4DD; }
+      100% { text-shadow: none; }
+    }
+
+    .text-footer {
+      margin-top: 24px;
+      font-size: 13px;
+      color: #666;
+      border-top: 1px solid #333;
+      padding-top: 12px;
+    }
+
+    .prob-area {
+      width: 320px;
+    }
+    .prob-title {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 16px;
+    }
+    .prob-bar-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .prob-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 32px;
+    }
+    .prob-word {
+      width: 60px;
+      text-align: right;
+      font-size: 18px;
+      color: #ccc;
+      flex-shrink: 0;
+    }
+    .prob-bar-bg {
+      flex: 1;
+      height: 24px;
+      background: #333;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .prob-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  background-color 0.3s;
+      background: #58C4DD;
+    }
+    .prob-bar.selected {
+      background: #58C4DD;
+      box-shadow: 0 0 12px rgba(88,196,221,0.5);
+    }
+    .prob-bar.dimmed { background: #4a6a70; }
+    .prob-pct {
+      width: 48px;
+      font-size: 13px;
+      color: #888;
+      flex-shrink: 0;
+    }
+
+    .annotation {
+      font-size: 12px;
+      color: #58C4DD;
+      margin-top: 8px;
+      opacity: 0;
+      transition: opacity 0.4s;
+      min-height: 18px;
+    }
+    .annotation.visible { opacity: 1; }
+
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+    }
+    button {
+      padding: 8px 20px;
+      background: #333; border: 1px solid #555;
+      border-radius: 6px; color: #fff;
+      cursor: pointer; font-size: 14px;
+      transition: all 0.2s;
+    }
+    button:hover { background: #444; border-color: #58C4DD; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <a class="nav-back" href="../../index.html">← 返回目录</a>
+  <h1>下一个词预测循环</h1>
+  <p class="subtitle">大语言模型 = 一台"下一个词预测器"</p>
+
+  <div class="viz-wrapper">
+    <div class="text-area">
+      <div class="text-content" id="textContent"><span class="cursor"></span></div>
+      <div class="text-footer">大语言模型 = 一台下一个词预测器</div>
+    </div>
+    <div class="prob-area">
+      <div class="prob-title">候选词概率分布</div>
+      <div class="prob-bar-container" id="probBars"></div>
+      <div class="annotation" id="annotation"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="playBtn">▶ 播放</button>
+    <button id="resetBtn">重置</button>
+  </div>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

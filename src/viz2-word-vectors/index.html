@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>可视化 2 — 词向量空间</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1c1c1c;
+      font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    a.nav-back {
+      position: fixed; top: 16px; left: 16px;
+      text-decoration: none; color: #888; font-size: 14px;
+    }
+    a.nav-back:hover { color: #58C4DD; }
+    h1 { font-size: 22px; font-weight: 300; margin: 20px 0 6px; color: #ccc; }
+    .subtitle { font-size: 13px; color: #666; margin-bottom: 16px; }
+
+    #container {
+      border: 1px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+    .legend {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: rgba(28,28,28,0.85);
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      z-index: 10;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .tooltip {
+      position: absolute;
+      background: rgba(28,28,28,0.92);
+      border: 1px solid #555;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 15px;
+      pointer-events: none;
+      z-index: 20;
+      display: none;
+      white-space: nowrap;
+    }
+
+    .controls {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    button {
+      padding: 8px 20px;
+      background: #333; border: 1px solid #555;
+      border-radius: 6px; color: #fff;
+      cursor: pointer; font-size: 14px;
+      transition: all 0.2s;
+    }
+    button:hover { background: #444; border-color: #83C167; }
+    .hint { font-size: 12px; color: #666; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <a class="nav-back" href="../../index.html">← 返回目录</a>
+  <h1>词向量空间</h1>
+  <p class="subtitle">相似的词在空间中靠得近</p>
+
+  <div style="position:relative;">
+    <div id="container"></div>
+    <div class="tooltip" id="tooltip"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="controls">
+    <button id="autoRotateBtn">⟳ 自动旋转</button>
+  </div>
+  <p class="hint">左键拖拽旋转 · 右键拖拽平移（触控板：双指点按拖拽）· 方向键↑↓←→平移 · 滚轮缩放</p>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>
