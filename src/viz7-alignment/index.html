@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⑥ 从"做梦"到"助手"</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #faf7f0;
+      font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: #1c1c1c;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      padding: 24px 16px 48px;
+    }
+    a.nav-back {
+      position: fixed; top: 16px; left: 16px;
+      text-decoration: none; color: #666; font-size: 14px;
+    }
+    a.nav-back:hover { color: #5C3F70; }
+
+    .chapter-label { font-size: 11px; color: #888; letter-spacing: 2px; margin-bottom: 4px; }
+    h1 { font-size: 22px; font-weight: 300; color: #2a2a2a; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #888; margin-bottom: 28px; }
+
+    /* ── pipeline timeline ── */
+    .pipeline {
+      display: flex; align-items: center; gap: 0;
+      margin-bottom: 32px; flex-wrap: wrap; justify-content: center;
+    }
+    .pipe-stage {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 10px 18px;
+      background: #ffffff; border: 1px solid #bfb6a0;
+      border-radius: 10px; cursor: pointer;
+      transition: all 0.25s; min-width: 120px;
+    }
+    .pipe-stage:hover { border-color: #9A72AC; }
+    .pipe-stage.active { background: rgba(154,114,172,0.15); border-color: #9A72AC; }
+    .pipe-stage .stage-num { font-size: 20px; font-weight: 100; color: #5C3F70; opacity: 0.6; }
+    .pipe-stage .stage-name { font-size: 13px; color: #2a2a2a; margin-top: 2px; }
+    .pipe-stage .stage-sub { font-size: 10px; color: #888; margin-top: 2px; }
+    .pipe-arrow { color: #bfb6a0; font-size: 22px; padding: 0 8px; }
+
+    /* ── comparison cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      width: min(920px, 100%);
+      margin-bottom: 28px;
+    }
+    .stage-card {
+      background: #ffffff; border: 1px solid #d8d0bd;
+      border-radius: 12px; padding: 20px;
+      display: flex; flex-direction: column; gap: 12px;
+      transition: border-color 0.3s;
+    }
+    .stage-card.highlight { border-color: #9A72AC; }
+
+    .card-header {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .card-num {
+      font-size: 28px; font-weight: 100;
+      opacity: 0.55; line-height: 1;
+    }
+    .card-title-wrap {}
+    .card-title { font-size: 15px; color: #2a2a2a; }
+    .card-subtitle { font-size: 11px; color: #888; margin-top: 2px; }
+
+    .card-data {
+      font-size: 12px; color: #444;
+      padding: 8px 12px; background: #f5f0e3;
+      border-radius: 6px; line-height: 1.6;
+    }
+    .card-data strong { color: #2a2a2a; }
+
+    /* chat bubble style for prompts */
+    .chat-section { display: flex; flex-direction: column; gap: 6px; }
+
+    .bubble {
+      padding: 8px 12px; border-radius: 10px;
+      font-size: 13px; line-height: 1.6; max-width: 100%;
+    }
+    .bubble.user {
+      background: #dfeed8; border: 1px solid #bcd6a0;
+      color: #444; align-self: flex-start;
+    }
+    .bubble.bot {
+      align-self: flex-start;
+      border: 1px solid #bfb6a0;
+    }
+    .bubble.bot.bad  { background: #fce5e3; border-color: #c89b95; color: #666; }
+    .bubble.bot.ok   { background: #dfedee; border-color: #86b6b6; color: #444; }
+    .bubble.bot.good { background: #e6f1d9; border-color: #7fbf60; color: #2a2a2a; }
+
+    .bubble-label {
+      font-size: 10px; color: #888; margin-bottom: 2px;
+    }
+
+    /* tone badge */
+    .tone-badge {
+      display: inline-block;
+      font-size: 10px; padding: 2px 8px;
+      border-radius: 12px; margin-top: 6px;
+    }
+    .tone-badge.bad  { background: rgba(252,98,85,0.15); color: #FC6255; border: 1px solid #FC6255; }
+    .tone-badge.ok   { background: rgba(88,196,221,0.12); color: #1F6F89; border: 1px solid #58C4DD; }
+    .tone-badge.good { background: rgba(131,193,103,0.15); color: #3F7A26; border: 1px solid #83C167; }
+
+    /* ── detail panel ── */
+    .detail-panel {
+      width: min(920px, 100%);
+      background: #ffffff; border: 1px solid #d8d0bd;
+      border-radius: 12px; padding: 24px;
+      margin-bottom: 24px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    }
+
+    .detail-title { font-size: 15px; color: #5C3F70; margin-bottom: 10px; }
+    .detail-body { font-size: 13px; color: #444; line-height: 1.8; }
+    .detail-body .hi { color: #2a2a2a; }
+    .detail-body .note { color: #888; font-size: 11px; }
+
+    .detail-list { display: flex; flex-direction: column; gap: 8px; }
+    .detail-item {
+      display: flex; gap: 10px; align-items: flex-start;
+      font-size: 13px; color: #444;
+    }
+    .detail-item .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── RLHF ranking sub-panel ── */
+    .rlhf-rank-panel {
+      width: min(920px, 100%);
+      background: #ffffff; border: 1px solid #d8d0bd;
+      border-radius: 12px; padding: 22px;
+      margin-bottom: 24px;
+      display: none;
+    }
+    .rlhf-rank-panel.visible { display: block; }
+    .rlhf-title { font-size: 14px; color: #3F7A26; margin-bottom: 4px; }
+    .rlhf-sub   { font-size: 12px; color: #888; margin-bottom: 14px; }
+    .rlhf-prompt {
+      font-size: 13px; color: #444; margin-bottom: 14px;
+      padding: 10px 14px; background: #f5f0e3;
+      border-left: 2px solid #9A72AC; border-radius: 4px;
+    }
+    .rank-list {
+      display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;
+    }
+    .rank-card {
+      display: flex; align-items: stretch; gap: 12px;
+      background: #f5f0e3; border: 1px solid #d8d0bd; border-radius: 8px;
+      padding: 12px 14px;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .rank-pos {
+      display: flex; align-items: center; justify-content: center;
+      width: 28px; font-size: 22px; color: #888; font-weight: 200;
+    }
+    .rank-card.is-first .rank-pos { color: #3F7A26; }
+    .rank-card.is-first { border-color: #7fbf60; }
+    .rank-card.is-last  { opacity: 0.7; }
+    .rank-text { flex: 1; font-size: 13px; color: #444; line-height: 1.6; }
+    .rank-text b { color: #5C3F70; margin-right: 6px; }
+    .rank-arrows {
+      display: flex; flex-direction: column; gap: 4px; justify-content: center;
+    }
+    .rank-arrow {
+      width: 26px; height: 22px; padding: 0;
+      background: #ede7d8; border: 1px solid #bfb6a0; border-radius: 4px;
+      font-size: 10px; color: #666; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .rank-arrow:hover { color: #B98A0E; border-color: #F4D03F; background: #faecca; }
+    .rank-arrow:disabled { opacity: 0.2; cursor: not-allowed; background: #ede7d8; color: #888; border-color: #bfb6a0; }
+
+    .pref-pairs {
+      font-size: 12px; color: #444; line-height: 1.8;
+      background: #e6f1d9; border: 1px solid #7fbf60; border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .pref-pairs-title { color: #3F7A26; font-size: 12px; margin-bottom: 8px; }
+    .pref-pair {
+      display: inline-block;
+      font-family: 'Menlo', 'Monaco', monospace;
+      background: #cfe7be; border: 1px solid #7fbf60; border-radius: 4px;
+      padding: 2px 8px; margin-right: 6px; margin-bottom: 4px;
+      color: #3F7A26; font-size: 11px;
+    }
+    .pref-explain { color: #666; margin-top: 8px; font-size: 11px; line-height: 1.6; }
+
+    /* ── key insight ── */
+    .insight {
+      width: min(920px, 100%);
+      background: #e6f1d9; border: 1px solid #7fbf60;
+      border-radius: 10px; padding: 18px 22px;
+      font-size: 13px; color: #444; line-height: 1.8;
+      text-align: center;
+    }
+    .insight strong { color: #3F7A26; }
+
+    /* ── controls ── */
+    .controls { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+    button {
+      padding: 9px 22px; background: #f5f0e3; border: 1px solid #a89f86;
+      border-radius: 8px; color: #1c1c1c; cursor: pointer; font-size: 14px; transition: all 0.2s;
+    }
+    button:hover { background: #ede7d8; border-color: #9A72AC; }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <a class="nav-back" href="../../index.html">← 返回目录</a>
+
+  <div class="chapter-label">Chapter 06</div>
+  <h1>从"做梦"到"助手"</h1>
+  <p class="subtitle">三个阶段，把"互联网模仿者"变成"有用的对话助手"</p>
+
+  <!-- pipeline -->
+  <div class="pipeline">
+    <div class="pipe-stage active" data-stage="0">
+      <div class="stage-num">①</div>
+      <div class="stage-name">预训练</div>
+      <div class="stage-sub">Base Model</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-stage" data-stage="1">
+      <div class="stage-num">②</div>
+      <div class="stage-name">SFT</div>
+      <div class="stage-sub">监督微调</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-stage" data-stage="2">
+      <div class="stage-num">③</div>
+      <div class="stage-name">RLHF</div>
+      <div class="stage-sub">人类反馈强化学习</div>
+    </div>
+  </div>
+
+  <!-- 3-column cards: always visible, highlight active -->
+  <div class="cards">
+    <!-- stage 0: base -->
+    <div class="stage-card" id="card0">
+      <div class="card-header">
+        <div class="card-num" style="color:#1F6F89">①</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Base Model（预训练）</div>
+          <div class="card-subtitle">只训练了"预测下一个词"</div>
+        </div>
+      </div>
+      <div class="card-data">
+        <strong>数据：</strong>全网文本（书籍、论坛、代码…）<br>
+        <strong>目标：</strong>最小化 next-token 预测 loss<br>
+        <strong>能力：</strong>补全任何文本风格
+      </div>
+      <div class="chat-section">
+        <div class="bubble-label">提问：如何减肥？</div>
+        <div class="bubble bot bad">
+          如何减肥的方法很多，比如节食。如何增肥的方法也很多，比如多吃。减肥和增肥都是……
+          <div class="tone-badge bad">继续补全，不回答</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- stage 1: SFT -->
+    <div class="stage-card" id="card1">
+      <div class="card-header">
+        <div class="card-num" style="color:#B98A0E">②</div>
+        <div class="card-title-wrap">
+          <div class="card-title">SFT（监督微调）</div>
+          <div class="card-subtitle">Supervised Fine-Tuning</div>
+        </div>
+      </div>
+      <div class="card-data">
+        <strong>数据：</strong>人工标注的问答对（数万条）<br>
+        <strong>目标：</strong>模仿"理想回答"的风格<br>
+        <strong>能力：</strong>能按格式回答问题
+      </div>
+      <div class="chat-section">
+        <div class="bubble-label">提问：如何减肥？</div>
+        <div class="bubble bot ok">
+          减肥的核心是热量缺口：消耗 > 摄入。<br>
+          建议：① 控制饮食热量 ② 增加有氧运动 ③ 保证睡眠。
+          <div class="tone-badge ok">有结构，但略生硬</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- stage 2: RLHF -->
+    <div class="stage-card" id="card2">
+      <div class="card-header">
+        <div class="card-num" style="color:#3F7A26">③</div>
+        <div class="card-title-wrap">
+          <div class="card-title">RLHF（人类反馈强化学习）</div>
+          <div class="card-subtitle">Reinforcement Learning from Human Feedback</div>
+        </div>
+      </div>
+      <div class="card-data">
+        <strong>数据：</strong>人类对多个回答打分/排名<br>
+        <strong>目标：</strong>最大化人类偏好分数（奖励模型）<br>
+        <strong>能力：</strong>有帮助、无害、诚实
+      </div>
+      <div class="chat-section">
+        <div class="bubble-label">提问：如何减肥？</div>
+        <div class="bubble bot good">
+          好问题！减肥关键在于持续的热量缺口。几个实用建议：<br>
+          • 记录每日饮食（用 app 更方便）<br>
+          • 每周 150 分钟中等强度运动<br>
+          • 优先蛋白质，减少精制碳水<br>
+          如果有基础疾病，建议先咨询医生。
+          <div class="tone-badge good">有帮助、贴心、负责任</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- detail panel (changes with active stage) -->
+  <div class="detail-panel" id="detailPanel">
+    <div>
+      <div class="detail-title" id="detailTitle">预训练（Pre-training）</div>
+      <div class="detail-body" id="detailBody">
+        模型在几十 TB 的网络文本上，通过不断预测下一个词来学习语言的统计规律。<br><br>
+        <span class="hi">结果是什么？</span> 一个强大的"语言模拟器"——它能补全任何文本，但不知道"有帮助"是什么意思。<br><br>
+        <span class="note">Karpathy 称之为"做互联网的梦"（dreaming the internet）</span>
+      </div>
+    </div>
+    <div class="detail-list" id="detailList">
+      <div class="detail-item"><div class="icon">📊</div><div>训练规模：数千亿到数万亿 token</div></div>
+      <div class="detail-item"><div class="icon">💻</div><div>算力：数千块 GPU 训练数周到数月</div></div>
+      <div class="detail-item"><div class="icon">⚠️</div><div>局限：会"补全"有害内容、没有对话意识</div></div>
+      <div class="detail-item"><div class="icon">✅</div><div>优点：形成了对世界知识的广泛表示</div></div>
+    </div>
+  </div>
+
+  <!-- RLHF ranking sub-panel: visible only on stage 2 -->
+  <div class="rlhf-rank-panel" id="rlhfRankPanel">
+    <div class="rlhf-title">▶ 试一试：你来给奖励模型当标注员</div>
+    <div class="rlhf-sub">用 ▲▼ 把下面 3 个回答按"你最喜欢 → 最不喜欢"重新排序</div>
+    <div class="rlhf-prompt">提问：写一条安慰失恋朋友的微信</div>
+    <div class="rank-list" id="rankList"></div>
+    <div class="pref-pairs">
+      <div class="pref-pairs-title">→ 你的排名转换为奖励模型的训练对（preference pairs）：</div>
+      <div id="prefPairs"></div>
+      <div class="pref-explain">每条 (X &gt; Y) 告诉奖励模型：X 的得分要比 Y 高。<br>真实 RLHF 收集数十万条这样的对比数据，训练出一个能"打分"的奖励模型，再用 PPO 让主模型最大化它。</div>
+    </div>
+  </div>
+
+  <!-- insight -->
+  <div class="insight">
+    <strong>关键洞察：</strong>
+    同一套参数（Base Model），经过 SFT 变成能"对话"的模型，再经过 RLHF 变成"有价值观"的助手。<br>
+    这三阶段不改变模型架构，只是<strong>继续训练</strong>，但目标和数据完全不同。<br>
+    ChatGPT = GPT-4（预训练）+ 微调 + RLHF + 安全过滤。
+  </div>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

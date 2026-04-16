@@ -3,219 +3,420 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>可视化 4 — Temperature 对输出的影响</title>
+  <title>⑤ 采样：概率如何变成文字</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #1c1c1c;
+      background: #faf7f0;
       font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      color: #fff;
+      color: #1c1c1c;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 30px 20px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      padding: 24px 16px 48px;
     }
     a.nav-back {
       position: fixed; top: 16px; left: 16px;
-      text-decoration: none; color: #888; font-size: 14px;
+      text-decoration: none; color: #666; font-size: 14px;
     }
     a.nav-back:hover { color: #FC6255; }
-    h1 { font-size: 22px; font-weight: 300; margin: 0 0 6px; color: #ccc; }
-    .subtitle { font-size: 13px; color: #666; margin-bottom: 24px; }
+    .chapter-label { font-size: 11px; color: #888; letter-spacing: 2px; margin-bottom: 4px; }
+    h1 { font-size: 22px; font-weight: 300; color: #2a2a2a; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #888; margin-bottom: 24px; }
 
-    .main-layout {
-      display: flex;
-      gap: 40px;
-      align-items: flex-start;
-      width: 100%;
-      max-width: 1000px;
+    /* ── mode tabs ── */
+    .mode-tabs {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 20px;
     }
+    .mode-tab {
+      padding: 8px 20px;
+      background: #ffffff; border: 1px solid #bfb6a0;
+      border-radius: 20px; cursor: pointer;
+      font-size: 13px; color: #666;
+      transition: all 0.2s;
+    }
+    .mode-tab:hover { border-color: #FC6255; color: #2a2a2a; }
+    .mode-tab.active { background: rgba(252,98,85,0.12); border-color: #FC6255; color: #FC6255; }
 
-    .left-panel {
-      flex: 1;
-      background: #222;
-      border: 1px solid #333;
-      border-radius: 12px;
-      padding: 28px;
-    }
-
-    .slider-section {
-      margin-bottom: 28px;
-    }
-    .slider-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .slider-label span { font-size: 14px; color: #aaa; }
-    .temp-value {
-      font-size: 36px;
-      font-weight: 200;
-      color: #FC6255;
-      font-variant-numeric: tabular-nums;
+    /* ── main layout ── */
+    .main {
+      display: flex; gap: 28px; align-items: flex-start;
+      width: min(900px, 100%); flex-wrap: wrap;
     }
 
+    /* ── left ── */
+    .left-col {
+      flex: 1; min-width: 260px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+
+    .info-card {
+      background: #ffffff; border: 1px solid #d8d0bd;
+      border-radius: 12px; padding: 20px;
+    }
+
+    .mode-title {
+      font-size: 16px; color: #FC6255; margin-bottom: 6px;
+    }
+    .mode-desc {
+      font-size: 13px; color: #666; line-height: 1.7; margin-bottom: 14px;
+    }
+    .use-case {
+      font-size: 12px; color: #888;
+      padding: 8px 12px; background: #f5f0e3;
+      border-radius: 6px; border-left: 3px solid #FC6255;
+    }
+    .use-case strong { color: #FC6255; }
+
+    /* formula box */
+    .formula-box {
+      background: #f5f0e3; border: 1px solid #bfb6a0;
+      border-radius: 8px; padding: 14px;
+      font-size: 12px; color: #666; line-height: 1.8;
+    }
+    .formula-box .eq { color: #2a2a2a; font-family: monospace; font-size: 13px; }
+    .formula-box .hi { color: #FC6255; }
+
+    /* sliders */
+    .slider-group { display: flex; flex-direction: column; gap: 12px; }
+    .slider-row { display: flex; flex-direction: column; gap: 6px; }
+    .slider-row label { font-size: 12px; color: #666; display: flex; justify-content: space-between; }
+    .slider-row label span { color: #FC6255; font-size: 15px; font-variant-numeric: tabular-nums; }
     input[type="range"] {
-      width: 100%;
-      -webkit-appearance: none;
-      height: 6px;
-      background: linear-gradient(to right, #58C4DD, #FC6255);
-      border-radius: 3px;
-      outline: none;
+      width: 100%; -webkit-appearance: none;
+      height: 5px; background: #d8d0bd; border-radius: 3px; outline: none;
     }
     input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 22px; height: 22px;
-      background: #fff;
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      -webkit-appearance: none; width: 18px; height: 18px;
+      background: #ffffff; border: 1px solid #bfb6a0; border-radius: 50%; cursor: pointer;
+      box-shadow: 0 1px 4px rgba(120,100,60,0.18);
     }
+    .range-labels { display: flex; justify-content: space-between; font-size: 10px; color: #888; }
 
-    .range-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: #666;
-      margin-top: 6px;
+    /* presets */
+    .presets { display: flex; gap: 6px; flex-wrap: wrap; }
+    .preset-btn {
+      padding: 4px 12px; background: #ffffff; border: 1px solid #bfb6a0;
+      border-radius: 16px; color: #666; cursor: pointer; font-size: 11px; transition: all 0.2s;
     }
+    .preset-btn:hover { border-color: #FC6255; color: #2a2a2a; }
+    .preset-btn.active { border-color: #FC6255; color: #FC6255; background: rgba(252,98,85,0.1); }
 
-    .description {
-      font-size: 14px;
-      color: #888;
-      line-height: 1.7;
-      padding: 16px;
-      background: #282828;
-      border-radius: 8px;
-      border-left: 3px solid #FC6255;
-      min-height: 80px;
-    }
+    /* ── right ── */
+    .right-col { width: 320px; flex-shrink: 0; }
 
-    .right-panel {
-      width: 400px;
+    .prompt-box {
+      background: #ffffff; border: 1px solid #d8d0bd; border-radius: 10px;
+      padding: 14px; margin-bottom: 16px;
     }
-    .prob-title {
-      font-size: 14px;
-      color: #888;
-      margin-bottom: 16px;
-    }
-    .prob-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-      height: 36px;
-    }
-    .prob-word {
-      width: 50px;
-      text-align: right;
-      font-size: 18px;
-      color: #ccc;
-      flex-shrink: 0;
-    }
-    .prob-bar-bg {
-      flex: 1;
-      height: 28px;
-      background: #333;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .prob-bar {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                  background-color 0.4s;
-    }
-    .prob-pct {
-      width: 52px;
-      font-size: 14px;
-      color: #aaa;
-      flex-shrink: 0;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .prompt-context {
-      margin-top: 24px;
-      padding: 16px;
-      background: #282828;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-    .prompt-context .label { color: #666; font-size: 12px; margin-bottom: 8px; }
-    .prompt-text { color: #ccc; font-size: 16px; }
-    .prompt-cursor {
-      display: inline-block;
-      width: 2px; height: 18px;
-      background: #58C4DD;
-      vertical-align: text-bottom;
-      animation: blink 1s step-end infinite;
+    .prompt-label { font-size: 11px; color: #888; margin-bottom: 6px; }
+    .prompt-text { font-size: 16px; color: #2a2a2a; }
+    .cursor {
+      display: inline-block; width: 2px; height: 18px; background: #58C4DD;
+      vertical-align: text-bottom; animation: blink 1s step-end infinite;
     }
     @keyframes blink { 50% { opacity: 0; } }
 
-    .presets {
-      margin-top: 16px;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+    .dist-title { font-size: 12px; color: #888; margin-bottom: 10px; }
+
+    .prob-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 7px; height: 28px;
     }
-    .preset-btn {
-      padding: 6px 14px;
-      background: #333;
-      border: 1px solid #444;
-      border-radius: 20px;
-      color: #aaa;
-      cursor: pointer;
-      font-size: 12px;
+    .prob-word { width: 36px; text-align: right; font-size: 16px; color: #2a2a2a; flex-shrink: 0; }
+    .prob-bar-bg { flex: 1; height: 22px; background: #ede7d8; border-radius: 3px; overflow: hidden; position: relative; }
+    .prob-bar {
+      height: 100%; border-radius: 3px;
+      transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  background 0.3s, opacity 0.3s;
+    }
+    .prob-pct { width: 42px; font-size: 11px; color: #888; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+
+    /* bar states */
+    .prob-bar.normal   { background: #58C4DD; opacity: 0.7; }
+    .prob-bar.selected { background: #FC6255; opacity: 1; box-shadow: 0 0 10px rgba(252,98,85,0.5); }
+    .prob-bar.greedy   { background: #F4D03F; opacity: 1; }
+    .prob-bar.eligible { background: #58C4DD; opacity: 0.85; }
+    .prob-bar.excluded { background: #d8d0bd; opacity: 0.5; }
+    .prob-bar.nucleus  { background: #9A72AC; opacity: 0.85; }
+
+    /* cutoff line for top-p */
+    .cutoff-line {
+      position: absolute; top: 0; right: 0; bottom: 0;
+      width: 2px; background: #9A72AC;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    /* selected word callout */
+    .selected-word-box {
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: #f5f0e3; border: 1px solid #a89f86; border-radius: 8px;
+      text-align: center;
+    }
+    .sel-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+    .sel-word { font-size: 28px; color: #FC6255; transition: transform 0.2s; }
+    .sel-word.flash { transform: scale(1.2); }
+    .sel-method { font-size: 11px; color: #888; margin-top: 4px; }
+
+    .resample-btn {
+      margin-top: 10px;
+      padding: 5px 14px; background: #ffffff; border: 1px solid #FC6255;
+      border-radius: 14px; color: #FC6255; cursor: pointer;
+      font-size: 11px; transition: all 0.2s;
+    }
+    .resample-btn:hover { background: rgba(252,98,85,0.12); }
+
+    /* frequency histogram */
+    .freq-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #f5f0e3; border: 1px solid #bfb6a0;
+      border-radius: 8px;
+    }
+    .freq-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px;
+    }
+    .freq-title { font-size: 12px; color: #666; }
+    .freq-btn {
+      padding: 4px 12px; background: #ffffff; border: 1px solid #a89f86;
+      border-radius: 14px; color: #2a2a2a; cursor: pointer; font-size: 11px;
       transition: all 0.2s;
     }
-    .preset-btn:hover { border-color: #FC6255; color: #fff; }
-    .preset-btn.active { border-color: #FC6255; color: #FC6255; background: rgba(252,98,85,0.1); }
+    .freq-btn:hover { border-color: #FC6255; color: #FC6255; }
+    .freq-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .freq-bars {
+      display: flex; flex-direction: column; gap: 4px;
+      min-height: 80px;
+    }
+    .freq-row {
+      display: flex; align-items: center; gap: 6px; height: 16px;
+    }
+    .freq-word { width: 22px; font-size: 12px; color: #444; text-align: right; }
+    .freq-bar-bg { flex: 1; height: 12px; background: #ede7d8; border-radius: 2px; overflow: hidden; }
+    .freq-bar {
+      height: 100%; background: #FC6255; opacity: 0.7;
+      transition: width 0.3s ease;
+    }
+    .freq-count { width: 28px; font-size: 10px; color: #888; font-variant-numeric: tabular-nums; }
+    .freq-hint { font-size: 10px; color: #888; margin-top: 8px; line-height: 1.5; }
+
+    /* ── intro: why sample ── */
+    .intro-section {
+      width: min(900px, 100%);
+      background: #ffffff;
+      border: 1px solid #e8e2d0;
+      border-radius: 12px;
+      padding: 16px 20px 18px;
+      margin-bottom: 22px;
+    }
+    .intro-title {
+      font-size: 13px; color: #FC6255;
+      margin-bottom: 12px; letter-spacing: 1px;
+    }
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 600px) { .intro-grid { grid-template-columns: 1fr; } }
+
+    .intro-card {
+      background: #f5f0e3; border: 1px solid #d8d0bd; border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .intro-card-title { font-size: 12px; color: #444; margin-bottom: 8px; }
+    .intro-card-title b { color: #FC6255; font-weight: 600; }
+
+    .dead-loop-text {
+      font-size: 12px; color: #666; line-height: 1.8;
+      font-family: 'Menlo', 'Monaco', monospace;
+      margin-bottom: 8px;
+      background: #ede7d8;
+      border-radius: 6px; padding: 8px 10px;
+    }
+    .dead-loop-text .repeat { color: #FC6255; opacity: 0.9; }
+    .dead-loop-cap { font-size: 10px; color: #888; line-height: 1.6; }
+
+    .mini-prompt { font-size: 11px; color: #666; margin: 4px 0 4px; }
+    .mini-prompt code {
+      background: #ede7d8; padding: 1px 6px;
+      border-radius: 3px; color: #2a2a2a;
+      font-family: 'Menlo', monospace; font-size: 10px;
+    }
+    .mini-dist { display: flex; flex-direction: column; gap: 3px; }
+    .mini-row { display: flex; align-items: center; gap: 6px; }
+    .mini-word { width: 32px; font-size: 11px; color: #666; }
+    .mini-bar-bg {
+      flex: 1; height: 9px;
+      background: #ede7d8; border-radius: 2px; overflow: hidden;
+    }
+    .mini-bar { height: 100%; opacity: 0.85; }
+    .mini-pct {
+      width: 38px; font-size: 10px; color: #888;
+      text-align: right; font-variant-numeric: tabular-nums;
+    }
+    .mini-label { font-size: 11px; margin-top: 6px; }
+    .mini-label.sharp { color: #1F6F89; }
+    .mini-label.flat  { color: #B98A0E; }
+    .mini-conclusion {
+      font-size: 10px; color: #888;
+      line-height: 1.6; margin-top: 8px;
+      padding-top: 8px; border-top: 1px solid #e8e2d0;
+    }
   </style>
 </head>
 <body>
   <a class="nav-back" href="../../index.html">← 返回目录</a>
-  <h1>Temperature 对输出的影响</h1>
-  <p class="subtitle">Softmax + Temperature：从确定到随机</p>
 
-  <div class="main-layout">
-    <div class="left-panel">
-      <div class="slider-section">
-        <div class="slider-label">
-          <span>Temperature</span>
-          <span class="temp-value" id="tempDisplay">1.0</span>
+  <div class="chapter-label">Chapter 05</div>
+  <h1>采样：概率如何变成文字</h1>
+  <p class="subtitle">四种策略，控制模型的"脑洞大小"</p>
+
+  <!-- intro: why sample at all? -->
+  <div class="intro-section">
+    <div class="intro-title">▶ 为什么不能永远选概率最高的词？</div>
+    <div class="intro-grid">
+
+      <div class="intro-card">
+        <div class="intro-card-title"><b>① 永远贪婪 → 死循环</b></div>
+        <div class="dead-loop-text">
+          <span style="color:#444;">提示：</span>今天天气真不错，<br>
+          <span style="color:#888;">→ 总选最高概率的词：</span><br>
+          今天天气真不错，<span class="repeat">今天天气真不错，今天天气真不错，今天天气真不错……</span>
         </div>
-        <input type="range" id="tempSlider" min="0.01" max="3" step="0.01" value="1.0">
-        <div class="range-labels">
-          <span>0 — 最确定</span>
-          <span>1.0 — 标准</span>
-          <span>3.0 — 最随机</span>
+        <div class="dead-loop-cap">⚠️ 同样的上文 → 同样的"最高概率词" → 卡住循环。<br>真实模型在贪婪模式下经常陷入这种重复（"the the the…" / "好的好的好的…"）。</div>
+      </div>
+
+      <div class="intro-card">
+        <div class="intro-card-title"><b>② 概率分布有时尖、有时平</b></div>
+
+        <div class="mini-prompt">尖锐：<code>1+1=</code></div>
+        <div class="mini-dist">
+          <div class="mini-row"><div class="mini-word">2</div>  <div class="mini-bar-bg"><div class="mini-bar" style="width:98%;background:#58C4DD"></div></div><div class="mini-pct">98%</div></div>
+          <div class="mini-row"><div class="mini-word">II</div> <div class="mini-bar-bg"><div class="mini-bar" style="width:1%;background:#58C4DD"></div></div><div class="mini-pct">1%</div></div>
+          <div class="mini-row"><div class="mini-word">…</div>  <div class="mini-bar-bg"><div class="mini-bar" style="width:1%;background:#58C4DD;opacity:0.4"></div></div><div class="mini-pct">1%</div></div>
+        </div>
+        <div class="mini-label sharp">→ 只有一个对答案，贪婪刚好</div>
+
+        <div class="mini-prompt" style="margin-top:10px;">平坦：<code>从前有一座</code></div>
+        <div class="mini-dist">
+          <div class="mini-row"><div class="mini-word">山</div> <div class="mini-bar-bg"><div class="mini-bar" style="width:24%;background:#F4D03F"></div></div><div class="mini-pct">24%</div></div>
+          <div class="mini-row"><div class="mini-word">城</div> <div class="mini-bar-bg"><div class="mini-bar" style="width:18%;background:#F4D03F"></div></div><div class="mini-pct">18%</div></div>
+          <div class="mini-row"><div class="mini-word">庙</div> <div class="mini-bar-bg"><div class="mini-bar" style="width:14%;background:#F4D03F"></div></div><div class="mini-pct">14%</div></div>
+          <div class="mini-row"><div class="mini-word">岛</div> <div class="mini-bar-bg"><div class="mini-bar" style="width:11%;background:#F4D03F"></div></div><div class="mini-pct">11%</div></div>
+          <div class="mini-row"><div class="mini-word">…</div>  <div class="mini-bar-bg"><div class="mini-bar" style="width:33%;background:#F4D03F;opacity:0.45"></div></div><div class="mini-pct">余 33%</div></div>
+        </div>
+        <div class="mini-label flat">→ 多种合理延续，需采样保留多样性</div>
+
+        <div class="mini-conclusion">两种情况共用同一套参数。所以采样策略要"看分布形状"决定要不要随机。</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- mode selector -->
+  <div class="mode-tabs">
+    <div class="mode-tab active" data-mode="greedy">贪婪（Greedy）</div>
+    <div class="mode-tab" data-mode="sampling">随机采样（Sampling）</div>
+    <div class="mode-tab" data-mode="topk">Top-K 采样</div>
+    <div class="mode-tab" data-mode="topp">Top-P（Nucleus）</div>
+  </div>
+
+  <div class="main">
+    <!-- LEFT -->
+    <div class="left-col">
+
+      <!-- description card -->
+      <div class="info-card">
+        <div class="mode-title" id="modeTitle">贪婪（Greedy）</div>
+        <div class="mode-desc" id="modeDesc">总是选概率最高的词。输出完全确定，不含随机性。</div>
+        <div class="use-case" id="useCase"><strong>适用：</strong>代码补全、精确翻译、格式化输出</div>
+      </div>
+
+      <!-- formula -->
+      <div class="formula-box" id="formulaBox">
+        <div class="eq">选择：argmax softmax(<span class="hi">l</span>)</div>
+        <div style="margin-top:6px;color:#888;font-size:11px;">
+          l = logit（模型原始输出），直接取最大值，无随机性
         </div>
       </div>
 
-      <div class="presets">
-        <button class="preset-btn" data-temp="0.01">T≈0 确定性</button>
-        <button class="preset-btn" data-temp="0.3">T=0.3 保守</button>
-        <button class="preset-btn active" data-temp="1.0">T=1.0 标准</button>
-        <button class="preset-btn" data-temp="1.5">T=1.5 创意</button>
-        <button class="preset-btn" data-temp="3.0">T=3.0 混乱</button>
-      </div>
+      <!-- controls (mode-specific) -->
+      <div class="info-card" id="controlsCard">
 
-      <div class="description" id="description">
-        标准温度。模型在高概率词和低概率词之间取得平衡，生成自然流畅的文本。
+        <!-- temperature (sampling mode) -->
+        <div id="tempControls" style="display:none;">
+          <div class="slider-row">
+            <label>Temperature (T) <span id="tempVal">1.00</span></label>
+            <input type="range" id="tempSlider" min="0.01" max="3" step="0.01" value="1.0">
+            <div class="range-labels"><span>0 → 确定</span><span>3 → 随机</span></div>
+          </div>
+          <div class="presets" style="margin-top:10px;">
+            <button class="preset-btn" data-temp="0.01">T≈0</button>
+            <button class="preset-btn" data-temp="0.3">T=0.3</button>
+            <button class="preset-btn active" data-temp="1.0">T=1.0</button>
+            <button class="preset-btn" data-temp="1.5">T=1.5</button>
+            <button class="preset-btn" data-temp="3.0">T=3.0</button>
+          </div>
+        </div>
+
+        <!-- top-k -->
+        <div id="topkControls" style="display:none;">
+          <div class="slider-row">
+            <label>K（候选数量） <span id="kVal">3</span></label>
+            <input type="range" id="kSlider" min="1" max="8" step="1" value="3">
+            <div class="range-labels"><span>1 → 等于贪婪</span><span>8 → 等于随机</span></div>
+          </div>
+        </div>
+
+        <!-- top-p -->
+        <div id="toppControls" style="display:none;">
+          <div class="slider-row">
+            <label>P（累积概率阈值） <span id="pVal">0.90</span></label>
+            <input type="range" id="pSlider" min="0.1" max="1.0" step="0.01" value="0.90">
+            <div class="range-labels"><span>0.1 → 几乎贪婪</span><span>1.0 → 全部候选</span></div>
+          </div>
+        </div>
+
+        <!-- greedy placeholder -->
+        <div id="greedyPlaceholder">
+          <div style="font-size:13px;color:#888;text-align:center;padding:8px 0;">
+            贪婪模式无需参数调整
+          </div>
+        </div>
+
       </div>
     </div>
 
-    <div class="right-panel">
-      <div class="prompt-context">
-        <div class="label">输入 Prompt</div>
-        <div class="prompt-text">从前有一座<span class="prompt-cursor"></span></div>
+    <!-- RIGHT -->
+    <div class="right-col">
+      <div class="prompt-box">
+        <div class="prompt-label">Prompt（输入上文）</div>
+        <div class="prompt-text">从前有一座<span class="cursor"></span></div>
       </div>
-      <div style="margin-top: 20px;">
-        <div class="prob-title">经 Softmax(T) 后的概率分布</div>
-        <div id="probBars"></div>
+
+      <div class="dist-title" id="distTitle">softmax 概率分布（下一个词）</div>
+
+      <div id="probBars"></div>
+
+      <div class="selected-word-box" id="selectedBox">
+        <div class="sel-label">本次采样：</div>
+        <div class="sel-word" id="selWord">—</div>
+        <div class="sel-method" id="selMethod"></div>
+        <button class="resample-btn" id="resampleBtn" style="display:none;">↻ 再采一次</button>
+      </div>
+
+      <!-- frequency histogram: shows distribution of N samples -->
+      <div class="freq-box" id="freqBox" style="display:none;">
+        <div class="freq-header">
+          <span class="freq-title">采 50 次 → 看实际频次</span>
+          <button class="freq-btn" id="freqBtn">▶ 采 50 次</button>
+        </div>
+        <div class="freq-bars" id="freqBars"></div>
+        <div class="freq-hint" id="freqHint">点击按钮，看在当前参数下，采 50 次的结果分布</div>
       </div>
     </div>
   </div>

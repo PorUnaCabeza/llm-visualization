@@ -3,177 +3,282 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>可视化 1 — 下一个词预测循环</title>
+  <title>① 下一个词游戏</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #1c1c1c;
+      background: #faf7f0;
       font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      color: #fff;
+      color: #1c1c1c;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding: 24px;
     }
     a.nav-back {
       position: fixed; top: 16px; left: 16px;
-      text-decoration: none; color: #888; font-size: 14px;
+      text-decoration: none; color: #666; font-size: 14px;
       transition: color 0.2s;
     }
-    a.nav-back:hover { color: #58C4DD; }
-    h1 {
-      font-size: 22px; font-weight: 300; margin: 20px 0 6px;
-      color: #ccc; letter-spacing: 1px;
-    }
-    .subtitle { font-size: 13px; color: #666; margin-bottom: 20px; }
+    a.nav-back:hover { color: #1F6F89; }
 
+    .chapter-label {
+      font-size: 12px; color: #888; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    h1 {
+      font-size: 22px; font-weight: 300; margin-bottom: 4px;
+      color: #2a2a2a; letter-spacing: 1px;
+    }
+    .subtitle { font-size: 13px; color: #888; margin-bottom: 28px; }
+
+    /* ── main layout ── */
     .viz-wrapper {
       display: flex;
-      gap: 40px;
+      gap: 48px;
       align-items: flex-start;
-      padding: 40px;
-      background: #222;
-      border-radius: 12px;
-      border: 1px solid #333;
-      min-width: 800px;
+      padding: 36px 40px;
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid #d8d0bd;
+      width: min(880px, 100%);
     }
 
-    .text-area {
-      flex: 1;
-      min-width: 340px;
+    /* ── LEFT: text area ── */
+    .text-area { flex: 1; min-width: 0; }
+
+    .phase-label {
+      font-size: 11px; color: #1F6F89; letter-spacing: 1px;
+      text-transform: uppercase; margin-bottom: 10px;
+      min-height: 16px; transition: opacity 0.4s;
     }
+
+    .prompt-box {
+      font-size: 13px; color: #888;
+      margin-bottom: 6px; display: none;
+    }
+    .prompt-box.visible { display: block; }
+
     .text-content {
-      font-size: 32px;
-      line-height: 1.6;
-      color: #eee;
-      min-height: 120px;
-      position: relative;
+      font-size: 30px;
+      line-height: 1.7;
+      color: #2a2a2a;
+      min-height: 100px;
     }
     .cursor {
       display: inline-block;
-      width: 2px;
-      height: 36px;
+      width: 2px; height: 34px;
       background: #58C4DD;
       vertical-align: text-bottom;
       animation: blink 1s step-end infinite;
       margin-left: 2px;
     }
     @keyframes blink { 50% { opacity: 0; } }
-
-    .word-highlight {
-      color: #58C4DD;
-      transition: color 0.3s;
-    }
-    .word-flash {
-      animation: flash 0.6s ease-out;
-    }
+    .word-highlight { color: #1F6F89; }
+    .word-flash { animation: flash 0.7s ease-out; }
     @keyframes flash {
-      0% { text-shadow: 0 0 20px #58C4DD, 0 0 40px #58C4DD; }
+      0% { text-shadow: 0 0 24px #58C4DD, 0 0 48px #58C4DD; }
       100% { text-shadow: none; }
     }
 
-    .text-footer {
-      margin-top: 24px;
-      font-size: 13px;
-      color: #666;
-      border-top: 1px solid #333;
-      padding-top: 12px;
+    /* ── complete reveal panel ── */
+    .complete-panel {
+      display: none; margin-top: 20px;
+      padding: 16px; background: #f5f0e3;
+      border-radius: 8px; border: 1px solid #d8d0bd;
+    }
+    .complete-panel.visible { display: block; }
+    .complete-panel .complete-story {
+      font-size: 22px; color: #2a2a2a; margin-bottom: 14px; line-height: 1.8;
+    }
+    .complete-panel .complete-story .ch {
+      display: inline-block;
+      animation: fadeUp 0.4s ease both;
+      color: #1F6F89;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    .prob-area {
-      width: 320px;
+    /* autoregressive loop diagram */
+    .loop-diagram {
+      margin-top: 14px;
+      font-size: 12px; color: #888;
+      display: flex; align-items: center; gap: 0;
+      flex-wrap: wrap; gap: 2px;
     }
+    .loop-box {
+      padding: 4px 10px;
+      border: 1px solid #bfb6a0;
+      border-radius: 6px;
+      color: #444; font-size: 12px;
+      background: #ede7d8;
+    }
+    .loop-arrow { color: #aaa; padding: 0 4px; font-size: 14px; }
+    .loop-highlight { border-color: #58C4DD; color: #1F6F89; }
+    .loop-caption {
+      width: 100%; margin-top: 10px;
+      font-size: 12px; color: #888; line-height: 1.6;
+    }
+
+    /* ── RIGHT: probability area ── */
+    .prob-area { width: 300px; flex-shrink: 0; }
+
     .prob-title {
-      font-size: 14px;
-      color: #888;
-      margin-bottom: 16px;
+      font-size: 13px; color: #666;
+      margin-bottom: 12px; min-height: 18px;
     }
+
+    /* vocab density overview */
+    .vocab-overview {
+      margin-bottom: 12px;
+      display: none;
+    }
+    .vocab-overview.visible { display: block; }
+    .vocab-density {
+      display: flex; align-items: flex-end; gap: 2px;
+      height: 60px; margin-bottom: 6px;
+    }
+    .vocab-density .vbar {
+      flex: 1; background: #d8d0bd;
+      border-radius: 2px 2px 0 0;
+      transition: height 0.6s ease, background 0.4s;
+      min-width: 3px;
+    }
+    .vocab-density .vbar.top { background: #58C4DD; }
+    .vocab-note {
+      font-size: 11px; color: #888; text-align: center;
+    }
+
+    /* top-5 bars */
     .prob-bar-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      display: flex; flex-direction: column; gap: 10px;
     }
     .prob-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      height: 32px;
+      display: flex; align-items: center; gap: 10px; height: 32px;
     }
     .prob-word {
-      width: 60px;
-      text-align: right;
-      font-size: 18px;
-      color: #ccc;
-      flex-shrink: 0;
+      width: 52px; text-align: right;
+      font-size: 18px; color: #2a2a2a; flex-shrink: 0;
     }
     .prob-bar-bg {
-      flex: 1;
-      height: 24px;
-      background: #333;
-      border-radius: 4px;
+      flex: 1; height: 24px;
+      background: #ede7d8; border-radius: 4px;
       overflow: hidden;
-      position: relative;
     }
     .prob-bar {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                  background-color 0.3s;
+      height: 100%; border-radius: 4px;
+      transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       background: #58C4DD;
     }
     .prob-bar.selected {
       background: #58C4DD;
-      box-shadow: 0 0 12px rgba(88,196,221,0.5);
+      box-shadow: 0 0 14px rgba(88,196,221,0.6);
     }
-    .prob-bar.dimmed { background: #4a6a70; }
+    .prob-bar.not-selected { background: #3a5560; opacity: 0.5; }
+    .prob-bar.would-be-greedy {
+      background: #888;
+      box-shadow: none;
+    }
     .prob-pct {
-      width: 48px;
-      font-size: 13px;
-      color: #888;
-      flex-shrink: 0;
+      width: 44px; font-size: 12px; color: #666; flex-shrink: 0;
     }
 
     .annotation {
-      font-size: 12px;
-      color: #58C4DD;
-      margin-top: 8px;
-      opacity: 0;
-      transition: opacity 0.4s;
-      min-height: 18px;
+      margin-top: 10px;
+      font-size: 12px; color: #B98A0E;
+      opacity: 0; transition: opacity 0.4s;
+      min-height: 16px; line-height: 1.5;
     }
     .annotation.visible { opacity: 1; }
 
+    .sampling-explain {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: #f5f0e3; border-radius: 6px;
+      border: 1px solid #bfb6a0;
+      font-size: 11px; color: #666; line-height: 1.6;
+      display: none;
+    }
+    .sampling-explain.visible { display: block; }
+    .sampling-explain .highlight { color: #B98A0E; }
+
+    /* ── controls ── */
     .controls {
-      margin-top: 20px;
-      display: flex;
-      gap: 12px;
+      margin-top: 24px; display: flex; gap: 12px;
     }
     button {
-      padding: 8px 20px;
-      background: #333; border: 1px solid #555;
-      border-radius: 6px; color: #fff;
+      padding: 9px 22px;
+      background: #ffffff; border: 1px solid #a89f86;
+      border-radius: 8px; color: #1c1c1c;
       cursor: pointer; font-size: 14px;
       transition: all 0.2s;
     }
-    button:hover { background: #444; border-color: #58C4DD; }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    button:hover { background: #f5f0e3; border-color: #58C4DD; }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
   </style>
 </head>
 <body>
   <a class="nav-back" href="../../index.html">← 返回目录</a>
-  <h1>下一个词预测循环</h1>
-  <p class="subtitle">大语言模型 = 一台"下一个词预测器"</p>
+
+  <div class="chapter-label">Chapter 01</div>
+  <h1>下一个词游戏</h1>
+  <p class="subtitle">LLM 的唯一工作：不停地预测下一个词</p>
 
   <div class="viz-wrapper">
+    <!-- LEFT -->
     <div class="text-area">
+      <div class="phase-label" id="phaseLabel"></div>
+      <div class="prompt-box" id="promptBox">提示词 / prompt：</div>
       <div class="text-content" id="textContent"><span class="cursor"></span></div>
-      <div class="text-footer">大语言模型 = 一台下一个词预测器</div>
+
+      <!-- shown at the end -->
+      <div class="complete-panel" id="completePanel">
+        <div class="complete-story" id="completeStory"></div>
+        <div class="loop-diagram">
+          <div class="loop-box loop-highlight">上文</div>
+          <div class="loop-arrow">→</div>
+          <div class="loop-box loop-highlight">模型</div>
+          <div class="loop-arrow">→</div>
+          <div class="loop-box">概率分布<br><span style="font-size:10px;color:#888">~100,000 个词</span></div>
+          <div class="loop-arrow">→</div>
+          <div class="loop-box loop-highlight">采样</div>
+          <div class="loop-arrow">→</div>
+          <div class="loop-box">新词追加</div>
+          <div class="loop-arrow">↩</div>
+          <div class="loop-caption">
+            每个字 = 一次采样。这个循环不断重复，直到生成终止符。<br>
+            这叫做 <strong style="color:#1F6F89">autoregressive generation</strong>。
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- RIGHT -->
     <div class="prob-area">
-      <div class="prob-title">候选词概率分布</div>
+      <div class="prob-title" id="probTitle">候选词概率分布</div>
+
+      <!-- vocab density (opening) -->
+      <div class="vocab-overview" id="vocabOverview">
+        <div class="vocab-density" id="vocabDensity"></div>
+        <div class="vocab-note" id="vocabNote"></div>
+      </div>
+
+      <!-- top-5 bars -->
       <div class="prob-bar-container" id="probBars"></div>
+
       <div class="annotation" id="annotation"></div>
+
+      <!-- sampling explanation box (step 4) -->
+      <div class="sampling-explain" id="samplingExplain">
+        <span class="highlight">采样 ≠ 贪婪选最高</span><br>
+        若总选第一名 → 输出死板重复<br>
+        随机采样 → 更自然、更有创意<br>
+        <span style="color:#aaa;font-size:10px">温度参数控制随机程度 → 见第 5 章</span>
+      </div>
     </div>
   </div>
 

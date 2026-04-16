@@ -7,9 +7,9 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #1c1c1c;
+      background: #faf7f0;
       font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      color: #fff;
+      color: #1c1c1c;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -23,25 +23,25 @@
       font-weight: 200;
       letter-spacing: 4px;
       margin-bottom: 12px;
-      background: linear-gradient(135deg, #58C4DD, #83C167);
+      background: linear-gradient(135deg, #1F6F89, #3F7A26);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .hero p { font-size: 16px; color: #888; font-weight: 300; }
+    .hero p { font-size: 16px; color: #777; font-weight: 300; }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 24px;
-      max-width: 1000px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      max-width: 1040px;
       width: 100%;
     }
     .card {
-      background: #252525;
-      border: 1px solid #333;
+      background: #ffffff;
+      border: 1px solid #e0d8c4;
       border-radius: 12px;
-      padding: 32px 28px;
+      padding: 28px 24px;
       text-decoration: none;
-      color: #fff;
+      color: #1c1c1c;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
@@ -54,32 +54,39 @@
       background: linear-gradient(90deg, var(--accent), transparent);
     }
     .card:hover {
-      border-color: #555;
+      border-color: var(--accent);
       transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+      box-shadow: 0 12px 40px rgba(120,100,60,0.15);
     }
     .card .num {
-      font-size: 48px;
+      font-size: 42px;
       font-weight: 100;
       color: var(--accent);
-      opacity: 0.6;
-      margin-bottom: 8px;
+      opacity: 0.7;
+      margin-bottom: 6px;
     }
-    .card h2 { font-size: 20px; font-weight: 400; margin-bottom: 12px; }
-    .card p { font-size: 14px; color: #999; line-height: 1.6; }
+    .card h2 { font-size: 19px; font-weight: 500; margin-bottom: 10px; color: #1c1c1c; }
+    .card p { font-size: 13px; color: #555; line-height: 1.6; }
     .card .tag {
       display: inline-block;
-      margin-top: 16px;
-      padding: 4px 12px;
+      margin-top: 14px;
+      padding: 3px 10px;
       border-radius: 20px;
+      font-size: 11px;
+      background: rgba(120,100,60,0.08);
+      color: #777;
+    }
+    .card .question {
       font-size: 12px;
-      background: rgba(255,255,255,0.06);
-      color: #aaa;
+      color: var(--accent);
+      opacity: 0.85;
+      margin-bottom: 8px;
+      font-style: italic;
     }
     .footer {
       margin-top: 60px;
       font-size: 13px;
-      color: #555;
+      color: #999;
     }
   </style>
 </head>
@@ -92,39 +99,61 @@
   <div class="grid">
     <a class="card" href="./src/viz1-next-word/index.html" style="--accent: #58C4DD;">
       <div class="num">01</div>
-      <h2>下一个词预测循环</h2>
-      <p>直观展示"AI 就是在一个词一个词地猜"——逐词出现的文本 + 实时概率分布柱状图</p>
-      <span class="tag">自动播放动画</span>
+      <div class="question">它到底在干什么？</div>
+      <h2>下一个词游戏</h2>
+      <p>LLM 的唯一工作：输出整个词表的概率分布，然后采样。一个词接一个词。</p>
+      <span class="tag">自动播放</span>
     </a>
 
     <a class="card" href="./src/viz2-word-vectors/index.html" style="--accent: #83C167;">
       <div class="num">02</div>
-      <h2>词向量空间</h2>
-      <p>50 个中文词在高维空间中的投影——相似的词靠得近，不同类别形成清晰的簇</p>
-      <span class="tag">可交互 3D 散点图</span>
+      <div class="question">文字如何变成数学？</div>
+      <h2>词如何变成向量</h2>
+      <p>从 token ID → one-hot → 嵌入矩阵 E → 语义空间，6 步图解词向量的完整旅程。</p>
+      <span class="tag">6 步分步讲解</span>
     </a>
 
-    <a class="card" href="./src/viz3-vector-arithmetic/index.html" style="--accent: #F4D03F;">
+    <a class="card" href="./src/viz5-transformer-anatomy/index.html" style="--accent: #7799CC;">
       <div class="num">03</div>
-      <h2>King − Man + Woman = Queen</h2>
-      <p>词向量的算术运算——展示"词之间的方向关系编码了语义"这一神奇现象</p>
-      <span class="tag">分步动画</span>
+      <div class="question">向量在模型里经历了什么？</div>
+      <h2>Transformer 结构解剖</h2>
+      <p>3D 拆解 LLM 内部：残差流 · Attention · Q/K/V · Feedforward · Unembedding</p>
+      <span class="tag">3D 分步动画</span>
+    </a>
+
+    <a class="card" href="./src/viz6-training/index.html" style="--accent: #F4D03F;">
+      <div class="num">04</div>
+      <div class="question">这些"理解"从哪里来？</div>
+      <h2>训练：把旋钮转到正确位置</h2>
+      <p>数十亿个参数 = 数十亿个旋钮。Loss 告诉它错了多少，反向传播把每个旋钮都微调一点。</p>
+      <span class="tag">动画 · 分步</span>
     </a>
 
     <a class="card" href="./src/viz4-temperature/index.html" style="--accent: #FC6255;">
-      <div class="num">04</div>
-      <h2>Temperature 对输出的影响</h2>
-      <p>拖动滑块改变温度，实时观察概率分布从"确定性"到"随机性"的变化</p>
+      <div class="num">05</div>
+      <div class="question">为什么每次回答不一样？</div>
+      <h2>采样：概率如何变成文字</h2>
+      <p>贪婪 vs 随机采样 · Temperature · Top-k · Top-p — 控制"脑洞大小"的四个旋钮</p>
       <span class="tag">可交互</span>
     </a>
-    <a class="card" href="./src/viz5-transformer-anatomy/index.html" style="--accent: #7799CC;">
-      <div class="num">05</div>
-      <h2>Transformer 结构解剖</h2>
-      <p>3D 拆解 LLM 内部：Token → Embedding → Attention → Feedforward → 概率输出</p>
-      <span class="tag">3D 分步动画</span>
+
+    <a class="card" href="./src/viz7-alignment/index.html" style="--accent: #9A72AC;">
+      <div class="num">06</div>
+      <div class="question">为什么 ChatGPT 能当助手？</div>
+      <h2>从"做梦"到"助手"</h2>
+      <p>Base model 只是互联网模仿者。SFT + RLHF 把它从"预测下一个词"掰成"帮你回答问题"。</p>
+      <span class="tag">三阶段对比</span>
+    </a>
+
+    <a class="card" href="./src/viz8-hallucination/index.html" style="--accent: #FC6255;">
+      <div class="num">07</div>
+      <div class="question">为什么它一本正经地胡说八道？</div>
+      <h2>幻觉：模型不知道自己不知道</h2>
+      <p>真答案和编造答案的"语言外形"是一样的。看清这个机制，再用 RAG / 引用 / 多次采样把幻觉过滤掉。</p>
+      <span class="tag">可交互</span>
     </a>
   </div>
 
-  <div class="footer">基于 manim-web · 深色背景 · 柔和彩色高亮 · 动画流畅缓动</div>
+  <div class="footer">基于 manim-web · 配合演讲科普 · 可交互</div>
 </body>
 </html>

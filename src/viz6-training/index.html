@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>④ 训练：把旋钮转到正确位置</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #faf7f0;
+      font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: #1c1c1c;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 24px 16px 40px;
+    }
+
+    a.nav-back {
+      position: fixed; top: 16px; left: 16px;
+      text-decoration: none; color: #666; font-size: 14px;
+      transition: color 0.2s;
+    }
+    a.nav-back:hover { color: #B98A0E; }
+
+    .chapter-label { font-size: 11px; color: #888; letter-spacing: 2px; margin-bottom: 4px; }
+    h1 { font-size: 22px; font-weight: 300; color: #2a2a2a; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #888; margin-bottom: 28px; }
+
+    /* ── step nav ── */
+    .step-info {
+      text-align: center;
+      font-size: 14px; color: #444;
+      margin-bottom: 20px;
+      min-height: 20px;
+      max-width: 700px;
+    }
+
+    /* ── main canvas area ── */
+    .stage {
+      width: min(840px, 100%);
+      background: #ffffff;
+      border: 1px solid #d8d0bd;
+      border-radius: 14px;
+      padding: 32px;
+      margin-bottom: 24px;
+      min-height: 420px;
+      position: relative;
+    }
+
+    /* === STEP 1: knob grid === */
+    .knob-section { display: none; }
+    .knob-section.active { display: block; }
+
+    .knob-header {
+      text-align: center;
+      font-size: 18px; color: #B98A0E;
+      margin-bottom: 6px;
+    }
+    .knob-sub {
+      text-align: center;
+      font-size: 13px; color: #888;
+      margin-bottom: 24px;
+    }
+
+    .knob-grid {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .knob {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px solid #bfb6a0;
+      position: relative;
+      cursor: default;
+      transition: border-color 0.4s, box-shadow 0.4s;
+      overflow: hidden;
+    }
+    .knob .tick {
+      position: absolute;
+      width: 2px; height: 35%;
+      background: #888;
+      top: 8%; left: 50%;
+      transform-origin: bottom center;
+      transform: translateX(-50%) rotate(0deg);
+      border-radius: 2px;
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  background 0.4s;
+    }
+    .knob.updating {
+      border-color: #F4D03F;
+      box-shadow: 0 0 10px rgba(244,208,63,0.4);
+    }
+    .knob.updating .tick { background: #F4D03F; }
+    .knob.done {
+      border-color: #83C167;
+      box-shadow: 0 0 8px rgba(131,193,103,0.25);
+    }
+    .knob.done .tick { background: #83C167; }
+
+    /* gradient magnitude tiers */
+    .knob.grad-high.updating {
+      border-color: #F4D03F;
+      box-shadow: 0 0 18px rgba(244,208,63,0.85);
+    }
+    .knob.grad-med.updating {
+      border-color: #F4D03F;
+      box-shadow: 0 0 7px rgba(244,208,63,0.35);
+    }
+    .knob.grad-low.updating {
+      border-color: #a89f86;
+      box-shadow: none;
+    }
+    .knob.grad-low.updating .tick { background: #888; }
+    .knob.grad-high.done {
+      border-color: #83C167;
+      box-shadow: 0 0 14px rgba(131,193,103,0.55);
+    }
+    .knob.grad-med.done {
+      border-color: #83C167;
+      box-shadow: 0 0 5px rgba(131,193,103,0.2);
+    }
+    .knob.grad-low.done {
+      border-color: #bcd6a0;
+      box-shadow: none;
+    }
+    .knob.grad-low.done .tick { background: #7fbf60; }
+
+    .grad-legend {
+      text-align: center; margin-top: 10px;
+      font-size: 11px; color: #888;
+      display: flex; gap: 16px; justify-content: center; align-items: center;
+    }
+
+    /* step-3 live progress (loss + step counter, coupled to knob ripple) */
+    .step3-progress {
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: #f5f0e3;
+      border: 1px solid #d8d0bd;
+      border-radius: 8px;
+      max-width: 540px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .s3p-line {
+      display: flex; align-items: baseline; justify-content: center;
+      gap: 6px; font-size: 12px; color: #666;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 8px;
+    }
+    .s3p-label { color: #888; }
+    .s3p-val { color: #2a2a2a; min-width: 50px; text-align: right; }
+    .s3p-loss { color: #FC6255; transition: color 0.4s; }
+    .s3p-loss.mid { color: #B98A0E; }
+    .s3p-loss.low { color: #3F7A26; }
+    .s3p-sep, .s3p-divider { color: #bfb6a0; }
+    .s3p-divider { padding: 0 8px; }
+    .s3p-total { color: #888; }
+
+    .s3p-bar-bg {
+      width: 100%; height: 6px;
+      background: #ede7d8; border-radius: 3px; overflow: hidden;
+    }
+    .s3p-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #FC6255, #F4D03F, #83C167);
+      transition: width 0.18s linear;
+    }
+    .s3p-cap {
+      font-size: 10px; color: #888;
+      margin-top: 8px; text-align: center;
+    }
+    .gl-dot { font-size: 14px; margin-right: 3px; }
+    .gl-high { color: #F4D03F; }
+    .gl-med  { color: #83C167; }
+    .gl-low  { color: #bfb6a0; }
+
+    .knob-count-label {
+      text-align: center;
+      font-size: 12px; color: #888;
+      margin-top: 8px;
+    }
+
+    /* === STEP 2: forward pass + loss === */
+    .fwd-section { display: none; }
+    .fwd-section.active { display: block; }
+
+    .fwd-layout {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .fwd-left { flex: 1; min-width: 200px; }
+    .fwd-right { width: 260px; flex-shrink: 0; }
+
+    .fwd-title { font-size: 15px; color: #B98A0E; margin-bottom: 12px; }
+
+    .token-flow {
+      display: flex; align-items: center; gap: 8px;
+      flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .token-box {
+      padding: 6px 12px;
+      border: 1px solid #a89f86;
+      border-radius: 6px;
+      font-size: 18px; color: #1c1c1c;
+      background: #f5f0e3;
+      transition: all 0.4s;
+    }
+    .token-box.active { border-color: #F4D03F; box-shadow: 0 0 12px rgba(244,208,63,0.3); }
+    .flow-arrow { color: #a89f86; font-size: 18px; }
+    .model-box {
+      padding: 10px 20px;
+      background: #e6f1d9;
+      border: 1px solid #83C167;
+      border-radius: 8px;
+      font-size: 14px; color: #3F7A26;
+      text-align: center;
+    }
+
+    .prediction-box {
+      margin-top: 16px;
+      padding: 14px;
+      background: #f5f0e3;
+      border-radius: 8px;
+      border: 1px solid #bfb6a0;
+    }
+    .pred-label { font-size: 11px; color: #888; margin-bottom: 8px; }
+    .pred-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+    }
+    .pred-word { width: 32px; font-size: 16px; color: #2a2a2a; }
+    .pred-bar-bg {
+      flex: 1; height: 18px; background: #ede7d8; border-radius: 3px; overflow: hidden;
+    }
+    .pred-bar {
+      height: 100%; border-radius: 3px;
+      background: #bfb6a0;
+      transition: width 0.8s ease, background 0.4s;
+    }
+    .pred-bar.correct { background: #83C167; }
+    .pred-bar.predicted { background: #FC6255; }
+    .pred-pct { width: 36px; font-size: 11px; color: #888; }
+
+    .loss-box {
+      margin-top: 20px;
+      padding: 16px;
+      background: #f5f0e3;
+      border-radius: 8px;
+      border: 1px solid #a89f86;
+      text-align: center;
+    }
+    .loss-label { font-size: 12px; color: #666; margin-bottom: 8px; }
+    .loss-value {
+      font-size: 36px; font-weight: 200; color: #FC6255;
+      transition: color 1s, opacity 0.4s;
+    }
+    .loss-arrow {
+      font-size: 24px; margin: 0 8px;
+      transition: all 0.8s;
+    }
+    .loss-caption { font-size: 12px; color: #888; margin-top: 6px; }
+
+    /* loss curve */
+    .loss-curve-wrap {
+      margin-top: 8px;
+    }
+    .loss-curve-label { font-size: 11px; color: #888; margin-bottom: 6px; }
+    #lossCurveCanvas {
+      display: block;
+      border-radius: 6px;
+      background: #ede7d8;
+    }
+
+    /* === STEP 3: backprop ripple === */
+    .back-section { display: none; }
+    .back-section.active { display: block; }
+
+    /* === STEP 4: before/after === */
+    .compare-section { display: none; }
+    .compare-section.active { display: block; }
+
+    .compare-title { font-size: 16px; color: #B98A0E; margin-bottom: 20px; text-align: center; }
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .compare-col {
+      background: #f5f0e3;
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid #d8d0bd;
+    }
+    .compare-col-title {
+      font-size: 13px; font-weight: 600;
+      margin-bottom: 12px; padding-bottom: 8px;
+      border-bottom: 1px solid #d8d0bd;
+    }
+    .compare-col.before .compare-col-title { color: #FC6255; }
+    .compare-col.after  .compare-col-title { color: #3F7A26; }
+    .compare-text {
+      font-size: 13px; line-height: 1.8; color: #444;
+    }
+    .compare-text .gibberish { color: #aaa; }
+    .compare-text .coherent { color: #1c1c1c; }
+    .compare-prompt {
+      font-size: 12px; color: #888; margin-bottom: 8px;
+    }
+    .emergence-note {
+      margin-top: 20px;
+      padding: 14px;
+      background: #e6f1d9;
+      border: 1px solid #83C167;
+      border-radius: 8px;
+      font-size: 13px; color: #444; line-height: 1.7;
+      text-align: center;
+    }
+    .emergence-note strong { color: #3F7A26; }
+
+    /* ── controls ── */
+    .controls {
+      display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    }
+    button {
+      padding: 9px 22px;
+      background: #f5f0e3; border: 1px solid #a89f86;
+      border-radius: 8px; color: #1c1c1c;
+      cursor: pointer; font-size: 14px;
+      transition: all 0.2s;
+    }
+    button:hover { background: #ede7d8; border-color: #F4D03F; }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <a class="nav-back" href="../../index.html">← 返回目录</a>
+
+  <div class="chapter-label">Chapter 04</div>
+  <h1>训练：把旋钮转到正确位置</h1>
+  <p class="subtitle">数十亿个参数 = 数十亿个旋钮。反向传播告诉每个旋钮该转多少。</p>
+
+  <div class="step-info" id="stepInfo"></div>
+
+  <div class="stage">
+
+    <!-- Step 1: knob grid -->
+    <div class="knob-section" id="sec1">
+      <div class="knob-header">GPT-2 的参数：1,500,000,000 个旋钮</div>
+      <div class="knob-sub">每个旋钮 = 一个浮点数，初始化时随机设置</div>
+      <div class="knob-grid" id="knobGrid"></div>
+      <div class="knob-count-label">↑ 这里只展示了 256 个。实际上有 15 亿个。</div>
+    </div>
+
+    <!-- Step 2: forward pass + loss -->
+    <div class="fwd-section" id="sec2">
+      <div class="fwd-layout">
+        <div class="fwd-left">
+          <div class="fwd-title">① 向前传播 — 模型做一次预测</div>
+          <div class="token-flow" id="tokenFlow">
+            <div class="token-box" id="tok1">从</div>
+            <div class="flow-arrow">→</div>
+            <div class="token-box" id="tok2">前</div>
+            <div class="flow-arrow">→</div>
+            <div class="token-box" id="tok3">有</div>
+            <div class="flow-arrow">→</div>
+            <div class="token-box" id="tok4">一</div>
+            <div class="flow-arrow">→</div>
+            <div class="token-box" id="tok5">座</div>
+            <div class="flow-arrow">→</div>
+            <div class="model-box">Transformer<br><span style="font-size:11px;color:#888">15亿个旋钮</span></div>
+          </div>
+
+          <div class="prediction-box">
+            <div class="pred-label">模型输出的概率（训练初期，参数随机）</div>
+            <div class="pred-row">
+              <div class="pred-word">山</div>
+              <div class="pred-bar-bg"><div class="pred-bar" id="bar山" style="width:0%"></div></div>
+              <div class="pred-pct" id="pct山">0%</div>
+            </div>
+            <div class="pred-row">
+              <div class="pred-word">城</div>
+              <div class="pred-bar-bg"><div class="pred-bar" id="bar城" style="width:0%"></div></div>
+              <div class="pred-pct" id="pct城">0%</div>
+            </div>
+            <div class="pred-row">
+              <div class="pred-word">庙</div>
+              <div class="pred-bar-bg"><div class="pred-bar predicted" id="bar庙" style="width:0%"></div></div>
+              <div class="pred-pct" id="pct庙">0%</div>
+            </div>
+            <div class="pred-row" style="margin-top:8px;border-top:1px solid #d8d0bd;padding-top:8px;">
+              <div class="pred-word" style="font-size:12px;color:#3F7A26;">✓ 正确</div>
+              <div class="pred-bar-bg"><div class="pred-bar correct" id="barCorrect" style="width:0%"></div></div>
+              <div class="pred-pct" id="pctCorrect">0%</div>
+            </div>
+            <div style="font-size:11px;color:#888;margin-top:6px;">正确答案是"山"，但模型只给了它 3% 的概率</div>
+          </div>
+        </div>
+
+        <div class="fwd-right">
+          <div class="fwd-title">② Loss — 衡量错了多少</div>
+          <div class="loss-box">
+            <div class="loss-label">cross-entropy loss</div>
+            <div>
+              <span class="loss-value" id="lossValue">—</span>
+            </div>
+            <div class="loss-caption" id="lossCaption">越高 = 预测越差</div>
+          </div>
+
+          <div class="loss-curve-wrap" style="margin-top:16px;">
+            <div class="loss-curve-label">训练过程中 loss 的变化</div>
+            <canvas id="lossCurveCanvas" width="240" height="140"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: backprop -->
+    <div class="back-section" id="sec3">
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="font-size:18px;color:#B98A0E;margin-bottom:6px;">③ 反向传播 — 每个旋钮微调一点</div>
+        <div style="font-size:13px;color:#888;">loss 对每个参数求偏导数，然后往 loss 减小的方向走一小步</div>
+      </div>
+      <div class="knob-grid" id="knobGrid2"></div>
+      <div class="grad-legend">
+        <span><span class="gl-dot gl-high">●</span>梯度大（大幅转动）</span>
+        <span><span class="gl-dot gl-med">●</span>梯度中</span>
+        <span><span class="gl-dot gl-low">●</span>梯度小（几乎不动）</span>
+      </div>
+
+      <!-- live training-progress indicator: couples to knob ripple -->
+      <div class="step3-progress">
+        <div class="s3p-line">
+          <span class="s3p-label">训练步数</span>
+          <span class="s3p-val" id="s3pStep">0</span>
+          <span class="s3p-sep">/</span>
+          <span class="s3p-total">300,000</span>
+          <span class="s3p-divider">·</span>
+          <span class="s3p-label">loss</span>
+          <span class="s3p-val s3p-loss" id="s3pLoss">3.51</span>
+        </div>
+        <div class="s3p-bar-bg"><div class="s3p-bar" id="s3pBar" style="width:100%"></div></div>
+        <div class="s3p-cap">↑ 每次旋钮更新都让 loss 降一点。重复 30 万次后，loss 收敛。</div>
+      </div>
+    </div>
+
+    <!-- Step 4: before/after -->
+    <div class="compare-section" id="sec4">
+      <div class="compare-title">④ 训练前 vs 训练后</div>
+      <div class="compare-grid">
+        <div class="compare-col before">
+          <div class="compare-col-title">训练前（参数随机）</div>
+          <div class="compare-prompt">提示词：从前有一座</div>
+          <div class="compare-text">
+            <span class="gibberish">
+              吗乘钟而洗呢奔粥岂摇于<br>
+              藤蜗敌驿悠倦聋麻燎壶鸯<br>
+              蹄烟碑峡绩涪铛羁蟒眺澍<br>
+            </span>
+            <span style="font-size:11px;color:#888;">← 参数随机 → 输出乱码</span>
+          </div>
+        </div>
+        <div class="compare-col after">
+          <div class="compare-col-title">训练后（loss 收敛）</div>
+          <div class="compare-prompt">提示词：从前有一座</div>
+          <div class="compare-text">
+            <span class="coherent">
+              从前有一座山，山里有一座庙，<br>
+              庙里有个老和尚，老和尚在讲<br>
+              故事……
+            </span>
+            <span style="font-size:11px;color:#3F7A26;">← 语义连贯，符合训练数据的统计规律</span>
+          </div>
+        </div>
+      </div>
+      <div class="emergence-note">
+        <strong>涌现（emergence）：</strong>
+        没有人教模型"语法"或"常识"——这些能力自然出现于 loss 的优化过程中。<br>
+        模型越大、数据越多，涌现出的能力越强，有时超出预期。
+      </div>
+    </div>
+
+  </div><!-- /stage -->
+
+  <div class="controls">
+    <button id="playBtn">▶ 播放</button>
+    <button id="prevBtn" disabled>← 上一步</button>
+    <button id="nextBtn">下一步 →</button>
+    <button id="resetBtn">重置</button>
+  </div>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

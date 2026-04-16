@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⑦ 为什么 LLM 会幻觉</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #faf7f0;
+      font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: #1c1c1c;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      padding: 24px 16px 48px;
+    }
+    a.nav-back {
+      position: fixed; top: 16px; left: 16px;
+      text-decoration: none; color: #666; font-size: 14px;
+    }
+    a.nav-back:hover { color: #FC6255; }
+
+    .chapter-label { font-size: 11px; color: #888; letter-spacing: 2px; margin-bottom: 4px; }
+    h1 { font-size: 22px; font-weight: 300; color: #2a2a2a; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #888; margin-bottom: 28px; max-width: 640px; text-align: center; line-height: 1.6; }
+
+    /* ── Section 1: same fluent confidence, different truth value ── */
+    .section {
+      width: min(960px, 100%);
+      margin-bottom: 28px;
+    }
+    .section-header {
+      font-size: 13px; color: #FC6255; letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .section-sub {
+      font-size: 12px; color: #888;
+      margin-bottom: 16px; line-height: 1.6;
+    }
+
+    .qa-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 800px) { .qa-grid { grid-template-columns: 1fr; } }
+
+    .qa-card {
+      background: #ffffff; border: 1px solid #d8d0bd;
+      border-radius: 12px; padding: 16px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .qa-q {
+      font-size: 12px; color: #666;
+      padding: 8px 12px;
+      background: #f5f0e3; border-left: 2px solid #a89f86;
+      border-radius: 4px; line-height: 1.6;
+    }
+    .qa-a {
+      font-size: 13px; color: #2a2a2a;
+      line-height: 1.7;
+      padding: 10px 12px;
+      background: #f5f0e3;
+      border-radius: 6px;
+      border: 1px solid #d8d0bd;
+    }
+    .qa-verdict {
+      font-size: 11px; padding: 4px 10px;
+      border-radius: 12px; align-self: flex-start;
+    }
+    .qa-verdict.true  { background: rgba(131,193,103,0.12); color: #3F7A26; border: 1px solid #7fbf60; }
+    .qa-verdict.false { background: rgba(252,98,85,0.12); color: #FC6255; border: 1px solid #c89b95; }
+    .qa-verdict.unknown { background: rgba(244,208,63,0.12); color: #B98A0E; border: 1px solid #d8c87a; }
+    .qa-explain {
+      font-size: 11px; color: #666;
+      line-height: 1.6;
+      padding-top: 8px; border-top: 1px solid #e8e2d0;
+    }
+
+    .key-insight {
+      margin-top: 18px;
+      padding: 14px 18px;
+      background: rgba(252,98,85,0.07);
+      border: 1px solid #c89b95;
+      border-radius: 8px;
+      font-size: 13px; color: #2a2a2a; line-height: 1.7;
+      text-align: center;
+    }
+    .key-insight strong { color: #FC6255; }
+
+    /* ── Section 2: training-data density slider ── */
+    .density-panel {
+      background: #ffffff; border: 1px solid #d8d0bd;
+      border-radius: 12px; padding: 22px;
+    }
+    .density-controls {
+      display: flex; flex-direction: column; gap: 10px;
+      margin-bottom: 18px;
+    }
+    .density-row {
+      display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap;
+    }
+    .density-row label {
+      font-size: 12px; color: #444;
+      min-width: 130px;
+    }
+    .density-row input[type="range"] {
+      flex: 1; min-width: 200px; accent-color: #FC6255;
+    }
+    .density-val {
+      min-width: 90px; font-size: 12px; color: #FC6255;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+    .density-bar {
+      flex: 1; min-width: 200px;
+      height: 10px; background: #ede7d8;
+      border-radius: 5px; overflow: hidden;
+      position: relative;
+    }
+    .density-fill {
+      height: 100%; background: linear-gradient(90deg, #bfb6a0, #58C4DD);
+      transition: width 0.25s;
+    }
+
+    .density-output {
+      background: #f5f0e3; border: 1px solid #d8d0bd;
+      border-radius: 8px; padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .density-output-label {
+      font-size: 11px; color: #888; margin-bottom: 6px;
+    }
+    .density-output-text {
+      font-size: 13px; color: #2a2a2a;
+      line-height: 1.7;
+    }
+    .density-output-text .word-grounded {
+      color: #3F7A26;
+      border-bottom: 1px dotted #7fbf60;
+    }
+    .density-output-text .word-fab {
+      color: #FC6255;
+      border-bottom: 1px dotted #c89b95;
+    }
+
+    .density-confidence {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px; color: #444;
+      padding: 10px 14px;
+      background: #f5f0e3; border-radius: 6px;
+    }
+    .conf-bar-bg {
+      flex: 1; height: 8px; background: #ede7d8;
+      border-radius: 4px; overflow: hidden;
+    }
+    .conf-bar {
+      height: 100%; background: #58C4DD;
+      transition: width 0.25s, background 0.25s;
+    }
+    .conf-val { min-width: 60px; text-align: right; color: #1F6F89; font-variant-numeric: tabular-nums; }
+
+    .density-note {
+      margin-top: 14px;
+      font-size: 11px; color: #666;
+      line-height: 1.7;
+      padding: 10px 14px;
+      background: #ede7d8; border-radius: 6px;
+      border-left: 2px solid #FC6255;
+    }
+    .density-note .hi { color: #FC6255; }
+
+    /* ── Section 3: mitigation cards ── */
+    .mit-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 700px) { .mit-grid { grid-template-columns: 1fr; } }
+
+    .mit-card {
+      background: #ffffff; border: 1px solid #d8d0bd;
+      border-radius: 10px; padding: 16px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .mit-icon {
+      font-size: 26px; line-height: 1;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .mit-body {}
+    .mit-title {
+      font-size: 14px; color: #1F6F89;
+      margin-bottom: 4px;
+    }
+    .mit-desc {
+      font-size: 12px; color: #444;
+      line-height: 1.7;
+    }
+    .mit-desc strong { color: #2a2a2a; }
+
+    /* ── Section 4: closing ── */
+    .closing {
+      width: min(960px, 100%);
+      background: #e6f1d9;
+      border: 1px solid #7fbf60;
+      border-radius: 10px;
+      padding: 18px 22px;
+      font-size: 13px; color: #444; line-height: 1.8;
+      text-align: center;
+    }
+    .closing strong { color: #3F7A26; }
+  </style>
+</head>
+<body>
+  <a class="nav-back" href="../../index.html">← 返回目录</a>
+
+  <div class="chapter-label">Chapter 07</div>
+  <h1>为什么 LLM 会"幻觉"</h1>
+  <p class="subtitle">模型不是在查数据库 —— 它是在"延续最像答案的句子"。<br>当训练数据里没有真答案时，它依然会生成一个"听起来像答案"的回答。</p>
+
+  <!-- Section 1: same confidence, different truth -->
+  <div class="section">
+    <div class="section-header">▶ 一、看不出真假：三个回答都同样流畅</div>
+    <div class="section-sub">下面三个问答风格完全一致 —— 都自信、都有结构、都"读起来像对的"。但只有一个是真的。</div>
+
+    <div class="qa-grid">
+
+      <div class="qa-card">
+        <div class="qa-q">爱因斯坦哪一年发表狭义相对论？</div>
+        <div class="qa-a">爱因斯坦于 <b>1905 年</b>在《Annalen der Physik》发表了《论动体的电动力学》一文，奠定了狭义相对论。</div>
+        <span class="qa-verdict true">✓ 真实</span>
+        <div class="qa-explain">这条事实在训练数据里出现了数千次，模型有强烈的统计支持。</div>
+      </div>
+
+      <div class="qa-card">
+        <div class="qa-q">请介绍李白《月下饮酒》一诗。</div>
+        <div class="qa-a">《月下饮酒》是李白晚年所作。开篇"<b>举杯邀残月，独坐沧洲台</b>"借月寄意，写尽孤寂。全诗意境苍凉……</div>
+        <span class="qa-verdict false">✗ 编造</span>
+        <div class="qa-explain">李白有《月下独酌》，没有《月下饮酒》。但"李白 + 月 + 酒"是高频组合，模型补出了一首"像李白会写的诗"。</div>
+      </div>
+
+      <div class="qa-card">
+        <div class="qa-q">2026 年图灵奖得主是谁？</div>
+        <div class="qa-a">2026 年图灵奖授予<b>陈昱辉教授</b>，表彰其在分布式一致性算法（RAFT-X 协议）方面的开创性贡献。</div>
+        <span class="qa-verdict false">✗ 编造</span>
+        <div class="qa-explain">超出训练截止时间，模型没有这个事实。但"图灵奖 + 教授 + 算法"是熟悉的句式，于是它"补"了一个。</div>
+      </div>
+
+    </div>
+
+    <div class="key-insight">
+      <strong>关键：</strong>真答案和编造答案的<strong>语言外形是一样的</strong>。模型自己也不知道哪个是真的 —— 它只是在选"下一个最像的词"。
+    </div>
+  </div>
+
+  <!-- Section 2: training data density slider -->
+  <div class="section">
+    <div class="section-header">▶ 二、为什么会这样？拨一下"训练数据密度"看看</div>
+    <div class="section-sub">训练数据里这个事实出现得越多，模型越准；几乎没出现 → 模型依然会自信回答，只是答案变成了编造。</div>
+
+    <div class="density-panel">
+      <div class="density-controls">
+        <div class="density-row">
+          <label>问题主题</label>
+          <select id="topicSel" style="padding:6px 10px;background:#f5f0e3;border:1px solid #bfb6a0;border-radius:4px;color:#2a2a2a;font-size:12px;flex:1;min-width:200px;">
+            <option value="celebrity">"爱因斯坦发表相对论那年"</option>
+            <option value="poem">"李白《静夜思》写于哪一年"</option>
+            <option value="future">"2026 年图灵奖得主"</option>
+          </select>
+        </div>
+        <div class="density-row">
+          <label>训练数据出现次数</label>
+          <input type="range" id="densitySlider" min="0" max="1000" step="1" value="500">
+          <span class="density-val" id="densityVal">500 次</span>
+        </div>
+        <div class="density-row">
+          <label>训练支持度</label>
+          <div class="density-bar"><div class="density-fill" id="densityFill" style="width:50%"></div></div>
+        </div>
+      </div>
+
+      <div class="density-output">
+        <div class="density-output-label">模型生成的回答（绿色 = 有训练支持，红色 = 编造）</div>
+        <div class="density-output-text" id="densityOutput"></div>
+      </div>
+
+      <div class="density-confidence">
+        <span>模型自报的"自信度"</span>
+        <div class="conf-bar-bg"><div class="conf-bar" id="confBar" style="width:90%"></div></div>
+        <span class="conf-val" id="confVal">90%</span>
+      </div>
+
+      <div class="density-note">
+        <span class="hi">⚠ 注意：</span>无论训练支持度高还是低，模型的"自信度"几乎不变。它<strong>没有内置的"我不知道"信号</strong> —— 这就是幻觉的核心机制。
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: mitigations -->
+  <div class="section">
+    <div class="section-header">▶ 三、怎么办？四种缓解方案</div>
+    <div class="section-sub">没有完美解药，但每种方法都能显著降低幻觉。</div>
+
+    <div class="mit-grid">
+
+      <div class="mit-card">
+        <div class="mit-icon">📚</div>
+        <div class="mit-body">
+          <div class="mit-title">RAG（检索增强）</div>
+          <div class="mit-desc">回答前先<strong>查文档</strong>，把检索到的真实段落塞进 prompt。模型就在"已给材料"里答，不靠自己记忆。</div>
+        </div>
+      </div>
+
+      <div class="mit-card">
+        <div class="mit-icon">🔗</div>
+        <div class="mit-body">
+          <div class="mit-title">引用 / 出处</div>
+          <div class="mit-desc">要求模型<strong>给出来源链接</strong>。带 URL 的回答更难编 —— 因为人能去验证。</div>
+        </div>
+      </div>
+
+      <div class="mit-card">
+        <div class="mit-icon">🤔</div>
+        <div class="mit-body">
+          <div class="mit-title">训练它会说"我不知道"</div>
+          <div class="mit-desc">在 SFT 阶段加入"无法确定时拒答"的样本。模型学会一种新模式：<strong>低置信度 → 拒答</strong>。</div>
+        </div>
+      </div>
+
+      <div class="mit-card">
+        <div class="mit-icon">🔁</div>
+        <div class="mit-body">
+          <div class="mit-title">自洽性（采样多次比对）</div>
+          <div class="mit-desc">同一个问题<strong>采样 5–10 次</strong>。如果每次答案都不同 → 大概率在编。如果每次都一致 → 多半是真的。</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Closing -->
+  <div class="closing">
+    <strong>核心认知：</strong>
+    LLM 是"<strong>统计模式生成器</strong>"，不是"事实数据库"。<br>
+    它会在每个位置选概率最高的词序列 —— 真假与否，模型自己感知不到。<br>
+    用它的时候，假设它会编 —— 然后用 RAG / 验证 / 多次采样把幻觉过滤掉。
+  </div>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>
