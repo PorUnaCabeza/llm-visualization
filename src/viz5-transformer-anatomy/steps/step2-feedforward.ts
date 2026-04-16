@@ -10,7 +10,7 @@ import { type V3, genVec, seededRandom, t } from '../utils';
 const NN_LAYER_SIZES = [5, 12, 5];
 const SLICE_SPREAD_Y = 1.0;
 const MAX_CONN_PER_SRC = 3;  // cap edges so the wider middle stays readable
-const RES_COLOR = '#B98A0E';
+const RES_COLOR = '#F4D03F';
 const HIGHLIGHT_IDX = 4;
 
 export async function step2Feedforward(scene: ThreeDScene): Promise<string> {
@@ -20,10 +20,10 @@ export async function step2Feedforward(scene: ThreeDScene): Promise<string> {
   scene.add(new Box3D({
     width: blockWidth, height: FF_HEIGHT, depth: 2.0,
     center: t([0, 0, ffCenterZ]),
-    color: '#997799', opacity: 0.3, wireframe: true,
+    color: '#aa66aa', opacity: 0.3, wireframe: true,
   }));
 
-  const title = new Text({ text: 'Feedforward', fontSize: 24, color: '#5C3F70' });
+  const title = new Text({ text: 'Feedforward', fontSize: 32, color: '#C77DDD' });
   title.moveTo(t([0, 1.5, FF_TOP_Z + 0.5]));
   scene.addFixedOrientationMobjects(title);
   scene.add(title);
@@ -54,7 +54,7 @@ export async function step2Feedforward(scene: ThreeDScene): Promise<string> {
         scene.add(new Sphere({
           center: t(pos),
           radius: l === 1 ? 0.05 : 0.06,
-          color: '#7a5faa',
+          color: '#9A72AC',
           opacity: l === 1 ? 0.55 : 0.8,
         }));
       }
@@ -100,18 +100,18 @@ export async function step2Feedforward(scene: ThreeDScene): Promise<string> {
 
   // Residual side label
   const sideX = START_X + (TOKEN_COUNT - 1) * TOKEN_SPACING + 1.6;
-  const resLbl = new Text({ text: '残差流', fontSize: 13, color: RES_COLOR });
+  const resLbl = new Text({ text: '残差流', fontSize: 18, color: RES_COLOR });
   resLbl.moveTo(t([sideX, 0, ffCenterZ + 0.3]));
   scene.addFixedOrientationMobjects(resLbl);
   scene.add(resLbl);
 
-  const resEq = new Text({ text: 'x ← x + ff(x)', fontSize: 10, color: '#666' });
+  const resEq = new Text({ text: 'x ← x + ff(x)', fontSize: 14, color: '#bbb' });
   resEq.moveTo(t([sideX, 0, ffCenterZ - 0.2]));
   scene.addFixedOrientationMobjects(resEq);
   scene.add(resEq);
 
   // ─── Expansion hint ───
-  const expLbl = new Text({ text: '中间层 ≈ 4× 宽', fontSize: 10, color: '#666' });
+  const expLbl = new Text({ text: '中间层 ≈ 4× 宽', fontSize: 14, color: '#bbb' });
   expLbl.moveTo(t([START_X - 2.8, 0, layerZ[1]]));
   scene.addFixedOrientationMobjects(expLbl);
   scene.add(expLbl);
@@ -120,7 +120,7 @@ export async function step2Feedforward(scene: ThreeDScene): Promise<string> {
   const outTopZ = FF_TOP_Z - FF_HEIGHT - 0.3;
   for (let i = 0; i < TOKEN_COUNT; i++) {
     const x = START_X + i * TOKEN_SPACING;
-    addVectorColumn(scene, x, outTopZ, genVec(700 + i * 53), '#9977bb', '#665588');
+    addVectorColumn(scene, x, outTopZ, genVec(700 + i * 53), '#d9c6ee', '#b39cd0');
   }
 
   scene.render();

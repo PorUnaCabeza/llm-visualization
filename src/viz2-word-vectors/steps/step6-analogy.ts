@@ -1,4 +1,4 @@
-import { Arrow3D, Line3D, Sphere, Text, ThreeDAxes, type ThreeDScene } from 'manim-web';
+import { Arrow3D, Line3D, Sphere, Text, type ThreeDScene } from 'manim-web';
 import { ANALOGY_POSITIONS } from '../constants';
 import { addWordSphere } from '../primitives';
 import { t, type V3 } from '../utils';
@@ -9,33 +9,76 @@ import { t, type V3 } from '../utils';
 // real text, directions in the space become interpretable axes. The vector
 // (king − man) encodes "royalty", and adding it to "woman" lands near "queen".
 
+const GRID_X = 5;
+const GRID_Y = 3;
+const GRID_Z_TOP = 4;
+const GRID_Z_BOT = -1;
+const GRID_STEP = 1;
+
+// Same trick as viz5 step4-journey: 3×3 bundle to fake line width.
+function drawAxes(scene: ThreeDScene) {
+  // Faint floor grid
+  for (let i = -GRID_X; i <= GRID_X; i += GRID_STEP) {
+    if (i === 0) continue;
+    scene.add(new Line3D({ start: t([i, -GRID_Y, 0]), end: t([i, GRID_Y, 0]), color: '#666666', opacity: 0.55 }));
+  }
+  for (let i = -GRID_Y; i <= GRID_Y; i += GRID_STEP) {
+    if (i === 0) continue;
+    scene.add(new Line3D({ start: t([-GRID_X, i, 0]), end: t([GRID_X, i, 0]), color: '#666666', opacity: 0.55 }));
+  }
+
+  const D = 0.04;
+  const drawAxis = (s: V3, e: V3, color: string, axis: 'x' | 'y' | 'z') => {
+    for (const a of [-D, 0, D]) {
+      for (const b of [-D, 0, D]) {
+        let off: V3;
+        if (axis === 'x') off = [0, a, b];
+        else if (axis === 'y') off = [a, 0, b];
+        else off = [a, b, 0];
+        scene.add(new Line3D({
+          start: t([s[0] + off[0], s[1] + off[1], s[2] + off[2]]),
+          end:   t([e[0] + off[0], e[1] + off[1], e[2] + off[2]]),
+          color, opacity: 1.0,
+        }));
+      }
+    }
+  };
+  drawAxis([-GRID_X, 0, 0], [GRID_X, 0, 0], '#FC6255', 'x');
+  drawAxis([0, -GRID_Y, 0], [0, GRID_Y, 0], '#83C167', 'y');
+  drawAxis([0, 0, GRID_Z_BOT], [0, 0, GRID_Z_TOP], '#58C4DD', 'z');
+
+  const xL = new Text({ text: 'x', fontSize: 14, color: '#FC6255' });
+  xL.moveTo(t([GRID_X + 0.3, 0, 0]));
+  scene.addFixedOrientationMobjects(xL); scene.add(xL);
+
+  const yL = new Text({ text: 'y', fontSize: 14, color: '#83C167' });
+  yL.moveTo(t([0, GRID_Y + 0.3, 0]));
+  scene.addFixedOrientationMobjects(yL); scene.add(yL);
+
+  const zL = new Text({ text: 'z', fontSize: 14, color: '#58C4DD' });
+  zL.moveTo(t([-0.3, 0, GRID_Z_TOP + 0.3]));
+  scene.addFixedOrientationMobjects(zL); scene.add(zL);
+}
+
 export function step6Analogy(scene: ThreeDScene): string {
   // Title
   const title = new Text({
     text: '⑥ 词向量代数 — 方向即语义',
-    fontSize: 22, color: '#B98A0E',
+    fontSize: 22, color: '#F4D03F',
   });
-  title.moveTo(t([0, 0, 4.5]));
+  title.moveTo(t([0, 0, 5.0]));
   scene.addFixedOrientationMobjects(title);
   scene.add(title);
 
   const sub = new Text({
     text: '国王 − 男人 + 女人  ≈  女王',
-    fontSize: 18, color: '#B98A0E',
+    fontSize: 18, color: '#F4D03F',
   });
-  sub.moveTo(t([0, 0, 3.9]));
+  sub.moveTo(t([0, 0, 4.4]));
   scene.addFixedOrientationMobjects(sub);
   scene.add(sub);
 
-  // Faint axes for orientation
-  scene.add(new ThreeDAxes({
-    xRange: [-4, 4, 1],
-    yRange: [-2, 2, 1],
-    zRange: [-1, 4, 1],
-    axisColor: '#bfb6a0',
-    showTicks: false,
-    tipLength: 0.2, tipRadius: 0.07, shaftRadius: 0.005,
-  }));
+  drawAxes(scene);
 
   // The four words — placed by ANALOGY_POSITIONS so they form a parallelogram
   const man = ANALOGY_POSITIONS['男人'];
@@ -43,10 +86,12 @@ export function step6Analogy(scene: ThreeDScene): string {
   const woman = ANALOGY_POSITIONS['女人'];
   const queen = ANALOGY_POSITIONS['女王'];
 
-  const MAN_COLOR = '#1F6F89';
-  const KING_COLOR = '#5C3F70';
-  const WOMAN_COLOR = '#C76F92';
-  const QUEEN_COLOR = '#B98A0E';
+  const MAN_COLOR = '#58C4DD';
+  const KING_COLOR = '#C77DDD';
+  const WOMAN_COLOR = '#FF8AB8';
+  const QUEEN_COLOR = '#F4D03F';
+  const ROYALTY_COLOR = '#83C167';
+  const GENDER_COLOR = '#FF8AB8';
 
   addWordSphere(scene, man,   '男人',  MAN_COLOR,   0.26, 16, [0.4, 0, -0.45]);
   addWordSphere(scene, king,  '国王',  KING_COLOR,  0.26, 16, [0.4, 0,  0.45]);
@@ -57,7 +102,7 @@ export function step6Analogy(scene: ThreeDScene): string {
   scene.add(new Arrow3D({
     start: t(man),
     end:   t(king),
-    color: '#3F7A26',
+    color: ROYALTY_COLOR,
     opacity: 0.95,
     shaftRadius: 0.028, tipLength: 0.2, tipRadius: 0.09,
   }));
@@ -66,7 +111,7 @@ export function step6Analogy(scene: ThreeDScene): string {
     0,
     (man[2] + king[2]) / 2,
   ];
-  const roy = new Text({ text: '+"王权"', fontSize: 13, color: '#3F7A26' });
+  const roy = new Text({ text: '+"王权"', fontSize: 13, color: ROYALTY_COLOR });
   roy.moveTo(t(royaltyMid));
   scene.addFixedOrientationMobjects(roy);
   scene.add(roy);
@@ -75,7 +120,7 @@ export function step6Analogy(scene: ThreeDScene): string {
   scene.add(new Arrow3D({
     start: t(woman),
     end:   t(queen),
-    color: '#3F7A26',
+    color: ROYALTY_COLOR,
     opacity: 0.95,
     shaftRadius: 0.028, tipLength: 0.2, tipRadius: 0.09,
   }));
@@ -84,7 +129,7 @@ export function step6Analogy(scene: ThreeDScene): string {
     0,
     (woman[2] + queen[2]) / 2,
   ];
-  const roy2 = new Text({ text: '+"王权"', fontSize: 13, color: '#3F7A26' });
+  const roy2 = new Text({ text: '+"王权"', fontSize: 13, color: ROYALTY_COLOR });
   roy2.moveTo(t(royaltyMid2));
   scene.addFixedOrientationMobjects(roy2);
   scene.add(roy2);
@@ -93,7 +138,7 @@ export function step6Analogy(scene: ThreeDScene): string {
   scene.add(new Arrow3D({
     start: t(man),
     end:   t(woman),
-    color: '#C76F92',
+    color: GENDER_COLOR,
     opacity: 0.95,
     shaftRadius: 0.028, tipLength: 0.2, tipRadius: 0.09,
   }));
@@ -102,7 +147,7 @@ export function step6Analogy(scene: ThreeDScene): string {
     0,
     man[2] - 0.4,
   ];
-  const gen = new Text({ text: '+"阴性"', fontSize: 13, color: '#C76F92' });
+  const gen = new Text({ text: '+"阴性"', fontSize: 13, color: GENDER_COLOR });
   gen.moveTo(t(genderMid));
   scene.addFixedOrientationMobjects(gen);
   scene.add(gen);
@@ -111,7 +156,7 @@ export function step6Analogy(scene: ThreeDScene): string {
   scene.add(new Arrow3D({
     start: t(king),
     end:   t(queen),
-    color: '#C76F92',
+    color: GENDER_COLOR,
     opacity: 0.7,
     shaftRadius: 0.022, tipLength: 0.18, tipRadius: 0.08,
   }));
@@ -130,14 +175,14 @@ export function step6Analogy(scene: ThreeDScene): string {
   scene.add(new Sphere({
     center: t(predicted),
     radius: 0.22,
-    color: '#B98A0E',
-    opacity: 0.35,
+    color: QUEEN_COLOR,
+    opacity: 0.45,
   }));
-  dash(predicted, queen, '#B98A0E', 0.6);
+  dash(predicted, queen, QUEEN_COLOR, 0.7);
 
   const predLbl = new Text({
     text: '国王 − 男人 + 女人',
-    fontSize: 11, color: '#B98A0E',
+    fontSize: 11, color: QUEEN_COLOR,
   });
   predLbl.moveTo(t([predicted[0] - 0.2, 0, predicted[2] + 0.7]));
   scene.addFixedOrientationMobjects(predLbl);
@@ -145,7 +190,7 @@ export function step6Analogy(scene: ThreeDScene): string {
 
   const predLbl2 = new Text({
     text: '= 落点 ≈ 女王',
-    fontSize: 11, color: '#B98A0E',
+    fontSize: 11, color: QUEEN_COLOR,
   });
   predLbl2.moveTo(t([predicted[0] - 0.2, 0, predicted[2] + 0.35]));
   scene.addFixedOrientationMobjects(predLbl2);
@@ -154,7 +199,7 @@ export function step6Analogy(scene: ThreeDScene): string {
   // Key insight
   const i1 = new Text({
     text: '→ 同一"方向"编码同一种语义关系（性别、王权、单复数、语种…）',
-    fontSize: 12, color: '#444',
+    fontSize: 12, color: '#dddddd',
   });
   i1.moveTo(t([0, 0, -2.5]));
   scene.addFixedOrientationMobjects(i1);
@@ -162,7 +207,7 @@ export function step6Analogy(scene: ThreeDScene): string {
 
   const i2 = new Text({
     text: 'Word2Vec (2013) 的经典发现 — 线性结构从未被显式编程，是训练自然涌现的',
-    fontSize: 12, color: '#666',
+    fontSize: 12, color: '#dddddd',
   });
   i2.moveTo(t([0, 0, -3.0]));
   scene.addFixedOrientationMobjects(i2);

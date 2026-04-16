@@ -19,10 +19,10 @@ const resetBtn = document.getElementById('resetBtn') as HTMLButtonElement;
 const scene = new ThreeDScene(container, {
   width: container.clientWidth || window.innerWidth,
   height: container.clientHeight || window.innerHeight,
-  backgroundColor: '#ebe5d4',
+  backgroundColor: '#0a0a0a',
   phi: 90 * (Math.PI / 180),
   theta: -90,
-  distance: 24,
+  distance: 28,
   fov: 36,
   enableOrbitControls: true,
   orbitControlsOptions: {
@@ -37,6 +37,20 @@ window.addEventListener('resize', () => {
     container.clientHeight || window.innerHeight,
   );
 });
+
+// Per-step camera framing. Steps 0–3 are the wide vertical transformer stack
+// (camera back, target shifted down); steps 4–5 are the journey + output, a
+// more compact scene → pull the camera in closer with a higher target.
+type Framing = { target: [number, number, number]; distance: number };
+const FRAMING_BY_STEP: Framing[] = [
+  { target: [0, -4, 0], distance: 28 },  // step0: tokens
+  { target: [0, -4, 0], distance: 28 },  // step1: attention
+  { target: [0, -4, 0], distance: 28 },  // step2: feedforward
+  { target: [0, -4, 0], distance: 28 },  // step3: repetitions
+  { target: [0,  3, 0], distance: 18 },  // step4: journey
+  { target: [0,  3, 0], distance: 18 },  // step5: output
+];
+scene.orbitControls!.setTarget(FRAMING_BY_STEP[0].target);
 
 // Arrow keys pan the camera; damping is already enabled above.
 const rawControls = scene.orbitControls!.getControls();
@@ -70,6 +84,7 @@ async function nextStep() {
   }
 
   try {
+    scene.orbitControls!.setTarget(TARGETS_BY_STEP[currentStep]);
     const info = await steps[currentStep](scene);
     stepInfoEl.textContent = info;
   } catch (e) {

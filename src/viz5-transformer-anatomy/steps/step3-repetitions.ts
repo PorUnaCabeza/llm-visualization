@@ -33,12 +33,12 @@ function drawGhostBoxes(
   scene.add(new Box3D({
     width: blockWidth, height: ATT_HEIGHT, depth: 2.0,
     center: t([0, yOff, attCenterZ]),
-    color: '#889aaa', opacity: wireFade, wireframe: true,
+    color: '#6688aa', opacity: wireFade, wireframe: true,
   }));
   scene.add(new Box3D({
     width: blockWidth, height: FF_HEIGHT, depth: 2.0,
     center: t([0, yOff, ffCenterZ]),
-    color: '#997799', opacity: wireFade, wireframe: true,
+    color: '#aa66aa', opacity: wireFade, wireframe: true,
   }));
 }
 
@@ -61,12 +61,12 @@ function drawGhostAttention(
         vecTopZ,
         vecColHeight,
         yOff,
-        isFirstGhost ? '#777' : '#888',
-        isFirstGhost ? 0.3 : 0.4,
+        isFirstGhost ? '#aaa' : '#999',
+        isFirstGhost ? 0.4 : 0.45,
       );
     }
     if (isFirstGhost) {
-      addVectorColumn(scene, START_X, vecTopZ, genVec(200 + layer * 97), '#8899aa', '#556677', yOff);
+      addVectorColumn(scene, START_X, vecTopZ, genVec(200 + layer * 97), '#cfd8e2', '#7799bb', yOff);
     }
   } else {
     for (let i = 0; i < TOKEN_COUNT; i += 3) {
@@ -76,8 +76,8 @@ function drawGhostAttention(
         vecTopZ,
         vecColHeight,
         yOff,
-        '#666',
-        0.2,
+        '#888',
+        0.25,
       );
     }
   }
@@ -105,7 +105,7 @@ function drawGhostAttention(
   for (let i = 0; i < TOKEN_COUNT; i += arcStep) {
     scene.add(new Sphere({
       center: t([START_X + i * TOKEN_SPACING, yOff, ATT_TOP_Z + 0.3]),
-      radius: 0.06, color: '#1F6F89', opacity: arcOp + 0.1,
+      radius: 0.06, color: '#58C4DD', opacity: arcOp + 0.1,
     }));
   }
 }
@@ -124,7 +124,7 @@ function drawGhostFeedforward(
     for (let ti = 0; ti < TOKEN_COUNT; ti += 4) {
       const cx = START_X + ti * TOKEN_SPACING;
       for (let l = 0; l < 3; l++) {
-        scene.add(new Sphere({ center: t([cx, yOff, nnZ[l]]), radius: 0.04, color: '#6688aa', opacity: 0.35 }));
+        scene.add(new Sphere({ center: t([cx, yOff, nnZ[l]]), radius: 0.04, color: '#88AACC', opacity: 0.55 }));
       }
     }
     return;
@@ -149,7 +149,7 @@ function drawGhostFeedforward(
           nnZ[l] + (rng() - 0.5) * 0.15,
         ];
         nodes.push(pos);
-        scene.add(new Sphere({ center: t(pos), radius: 0.04, color: '#6688aa', opacity: 0.7 }));
+        scene.add(new Sphere({ center: t(pos), radius: 0.04, color: '#88AACC', opacity: 0.8 }));
       }
       allNodes.push(nodes);
     }
@@ -170,12 +170,12 @@ function drawGhostFeedforward(
 }
 
 function drawGhostLabels(scene: ThreeDScene, yOff: number) {
-  const attL = new Text({ text: 'Attention', fontSize: 12, color: '#1F6F89' });
+  const attL = new Text({ text: 'Attention', fontSize: 16, color: '#58C4DD' });
   attL.moveTo(t([0, yOff + 1.3, ATT_TOP_Z + 0.3]));
   scene.addFixedOrientationMobjects(attL);
   scene.add(attL);
 
-  const ffL = new Text({ text: 'Feedforward', fontSize: 12, color: '#5C3F70' });
+  const ffL = new Text({ text: 'Feedforward', fontSize: 16, color: '#C77DDD' });
   ffL.moveTo(t([0, yOff + 1.3, FF_TOP_Z + 0.3]));
   scene.addFixedOrientationMobjects(ffL);
   scene.add(ffL);
@@ -188,16 +188,16 @@ function drawRepetitionsCaption(scene: ThreeDScene, blockWidth: number) {
   for (let d = 0; d < 3; d++) {
     scene.add(new Sphere({
       center: t([0, dotsY + d * 1.2, midZ]),
-      radius: 0.2, color: '#a0b0c0', opacity: 0.5 - d * 0.1,
+      radius: 0.2, color: '#a0b0c0', opacity: 0.6 - d * 0.12,
     }));
   }
 
-  const rep = new Text({ text: '× 96 层', fontSize: 20, color: '#555' });
+  const rep = new Text({ text: '× 96 层', fontSize: 28, color: '#dddddd' });
   rep.moveTo(t([blockWidth / 2 + 2, dotsY, midZ + 1.5]));
   scene.addFixedOrientationMobjects(rep);
   scene.add(rep);
 
-  const sub = new Text({ text: 'Many repetitions', fontSize: 14, color: '#666' });
+  const sub = new Text({ text: 'Many repetitions', fontSize: 18, color: '#aaaaaa' });
   sub.moveTo(t([blockWidth / 2 + 2, dotsY, midZ + 0.7]));
   scene.addFixedOrientationMobjects(sub);
   scene.add(sub);

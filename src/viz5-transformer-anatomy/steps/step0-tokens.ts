@@ -9,8 +9,8 @@ export async function step0Tokens(scene: ThreeDScene): Promise<string> {
 
   TOKENS.forEach((tok, i) => {
     const x = START_X + i * TOKEN_SPACING;
-    const label = new Text({ text: tok, fontSize: 16, color: TOKEN_COLORS[i] });
-    label.moveTo(t([x, 0, 4]));
+    const label = new Text({ text: tok, fontSize: 24, color: TOKEN_COLORS[i] });
+    label.moveTo(t([x, 0, 2.6]));
     scene.addFixedOrientationMobjects(label);
     scene.add(label);
   });

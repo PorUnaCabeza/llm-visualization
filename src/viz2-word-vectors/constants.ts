@@ -13,26 +13,26 @@ export interface DemoWord {
 
 // Small curated demo vocab. IDs are plausible-looking (not real BPE indices).
 export const DEMO_WORDS: DemoWord[] = [
-  { word: '猫',   id: 2031,  category: '动物', color: '#1F6F89' },
-  { word: '狗',   id: 2034,  category: '动物', color: '#1F6F89' },
-  { word: '国王', id: 8472,  category: '人物', color: '#5C3F70' },
-  { word: '女王', id: 8473,  category: '人物', color: '#5C3F70' },
-  { word: '男人', id:  305,  category: '人物', color: '#5C3F70' },
-  { word: '女人', id:  306,  category: '人物', color: '#5C3F70' },
-  { word: '跑步', id: 5211,  category: '动作', color: '#3F7A26' },
+  { word: '猫',   id: 2031,  category: '动物', color: '#58C4DD' },
+  { word: '狗',   id: 2034,  category: '动物', color: '#58C4DD' },
+  { word: '国王', id: 8472,  category: '人物', color: '#C77DDD' },
+  { word: '女王', id: 8473,  category: '人物', color: '#C77DDD' },
+  { word: '男人', id:  305,  category: '人物', color: '#C77DDD' },
+  { word: '女人', id:  306,  category: '人物', color: '#C77DDD' },
+  { word: '跑步', id: 5211,  category: '动作', color: '#83C167' },
   { word: '快乐', id: 9830,  category: '情感', color: '#FC6255' },
-  { word: '中国', id:  127,  category: '国家', color: '#C97B11' },
-  { word: '数字', id: 15230, category: '抽象', color: '#888888' },
+  { word: '中国', id:  127,  category: '国家', color: '#F4D03F' },
+  { word: '数字', id: 15230, category: '抽象', color: '#aaaaaa' },
 ];
 
 // Category palette for the cloud step.
 export const CATEGORY_COLORS: Record<string, string> = {
-  '动物': '#1F6F89',
-  '国家': '#C97B11',
-  '食物': '#B98A0E',
+  '动物': '#58C4DD',
+  '国家': '#F4D03F',
+  '食物': '#FC9F50',
   '情感': '#FC6255',
-  '职业': '#5C3F70',
-  '其他': '#888888',
+  '职业': '#C77DDD',
+  '其他': '#aaaaaa',
 };
 
 // Words used in the cloud step (kept plentiful so clusters look real).

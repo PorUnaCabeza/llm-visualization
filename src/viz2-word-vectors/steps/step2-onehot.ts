@@ -17,21 +17,21 @@ const CELLS = 16;  // visible cells; the rest is "…"
 
 // Fixed showcase: 猫 at cell 3, 狗 at cell 9 — close IDs, but orthogonal.
 const EXAMPLES = [
-  { word: '猫', id: 2031, litCell: 3,  color: '#1F6F89' },
-  { word: '狗', id: 2034, litCell: 9,  color: '#1F6F89' },
-  { word: '国王', id: 8472, litCell: 13, color: '#5C3F70' },
+  { word: '猫', id: 2031, litCell: 3,  color: '#58C4DD' },
+  { word: '狗', id: 2034, litCell: 9,  color: '#58C4DD' },
+  { word: '国王', id: 8472, litCell: 13, color: '#C77DDD' },
 ];
 
 export function step2OneHot(scene: ThreeDScene): string {
   // Title
-  const title = new Text({ text: '② One-hot 编码（教科书式第一步）', fontSize: 22, color: '#B98A0E' });
+  const title = new Text({ text: '② One-hot 编码（教科书式第一步）', fontSize: 22, color: '#F4D03F' });
   title.moveTo(t([0, 0, 3.8]));
   scene.addFixedOrientationMobjects(title);
   scene.add(title);
 
   const sub = new Text({
     text: `把 ID 变成一个长度 ${VOCAB_SIZE.toLocaleString()} 的向量，只有 ID 位置是 1，其它全为 0`,
-    fontSize: 13, color: '#666',
+    fontSize: 13, color: '#dddddd',
   });
   sub.moveTo(t([0, 0, 3.15]));
   scene.addFixedOrientationMobjects(sub);
@@ -42,12 +42,12 @@ export function step2OneHot(scene: ThreeDScene): string {
   const barLeftX = -2.2;  // tuned so word-labels-on-left and end-of-bar-equation both fit
   const barRightX = barLeftX + CELLS * cellStride;
 
-  const leftLbl = new Text({ text: '0', fontSize: 10, color: '#888' });
+  const leftLbl = new Text({ text: '0', fontSize: 10, color: '#dddddd' });
   leftLbl.moveTo(t([barLeftX - 0.2, 0, 2.3]));
   scene.addFixedOrientationMobjects(leftLbl);
   scene.add(leftLbl);
 
-  const rightLbl = new Text({ text: `${VOCAB_SIZE.toLocaleString()}`, fontSize: 10, color: '#888' });
+  const rightLbl = new Text({ text: `${VOCAB_SIZE.toLocaleString()}`, fontSize: 10, color: '#dddddd' });
   rightLbl.moveTo(t([barRightX + 0.9, 0, 2.3]));
   scene.addFixedOrientationMobjects(rightLbl);
   scene.add(rightLbl);
@@ -62,7 +62,7 @@ export function step2OneHot(scene: ThreeDScene): string {
     scene.addFixedOrientationMobjects(word);
     scene.add(word);
 
-    const id = new Text({ text: `ID = ${ex.id}`, fontSize: 11, color: '#666' });
+    const id = new Text({ text: `ID = ${ex.id}`, fontSize: 11, color: '#dddddd' });
     id.moveTo(t([barLeftX - 1.1, 0, z - 0.38]));
     scene.addFixedOrientationMobjects(id);
     scene.add(id);
@@ -73,7 +73,7 @@ export function step2OneHot(scene: ThreeDScene): string {
     // bracket equation on the right
     const eq = new Text({
       text: `长度 ${VOCAB_SIZE.toLocaleString()}`,
-      fontSize: 11, color: '#888',
+      fontSize: 11, color: '#dddddd',
     });
     eq.moveTo(t([barRightX + 1.2, 0, z]));
     scene.addFixedOrientationMobjects(eq);
@@ -87,17 +87,17 @@ export function step2OneHot(scene: ThreeDScene): string {
   scene.addFixedOrientationMobjects(pTitle);
   scene.add(pTitle);
 
-  const p1 = new Text({ text: '① 维度爆炸：每个词一个 50000 维向量', fontSize: 12, color: '#444' });
+  const p1 = new Text({ text: '① 维度爆炸：每个词一个 50000 维向量', fontSize: 12, color: '#eeeeee' });
   p1.moveTo(t([0, 0, problemsZ - 0.5]));
   scene.addFixedOrientationMobjects(p1);
   scene.add(p1);
 
-  const p2 = new Text({ text: '② 两两正交：cos(猫, 狗) = 0', fontSize: 12, color: '#444' });
+  const p2 = new Text({ text: '② 两两正交：cos(猫, 狗) = 0', fontSize: 12, color: '#eeeeee' });
   p2.moveTo(t([0, 0, problemsZ - 0.9]));
   scene.addFixedOrientationMobjects(p2);
   scene.add(p2);
 
-  const p3 = new Text({ text: '③ 零语义：猫·狗 = 猫·汽车 = 猫·愤怒 = 0', fontSize: 12, color: '#444' });
+  const p3 = new Text({ text: '③ 零语义：猫·狗 = 猫·汽车 = 猫·愤怒 = 0', fontSize: 12, color: '#eeeeee' });
   p3.moveTo(t([0, 0, problemsZ - 1.3]));
   scene.addFixedOrientationMobjects(p3);
   scene.add(p3);

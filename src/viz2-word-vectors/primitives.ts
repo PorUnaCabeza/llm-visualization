@@ -22,8 +22,8 @@ export function addOneHotBar(
     scene.add(new Box3D({
       width: cellSize, height: cellSize, depth: cellSize,
       center: t([x, leftCenter[1], leftCenter[2]]),
-      color: isLit ? litColor : '#bfb6a0',
-      opacity: isLit ? 1.0 : 0.5,
+      color: isLit ? litColor : '#777777',
+      opacity: isLit ? 1.0 : 0.85,
     }));
     if (isLit) {
       // "1" label above the lit cell
@@ -36,7 +36,7 @@ export function addOneHotBar(
 
   if (showTruncation) {
     const tailX = leftCenter[0] + cellCount * (cellSize + gap) + 0.15;
-    const dots = new Text({ text: '⋯', fontSize: 18, color: '#888' });
+    const dots = new Text({ text: '⋯', fontSize: 18, color: '#aaaaaa' });
     dots.moveTo(t([tailX, leftCenter[1], leftCenter[2]]));
     scene.addFixedOrientationMobjects(dots);
     scene.add(dots);
@@ -69,8 +69,8 @@ export function addMatrixGrid(
       scene.add(new Box3D({
         width: cellSize * 0.9, height: cellSize * 0.9, depth: cellSize * 0.9,
         center: t([xCenter, topLeft[1], zCenter]),
-        color: isPos ? '#4A90E2' : '#E06360',
-        opacity: 0.25 + mag * 0.6,
+        color: isPos ? '#58C4DD' : '#FC6255',
+        opacity: 0.35 + mag * 0.6,
       }));
     }
     const rowCenterX = topLeft[0] + ((cols - 1) * cellSize) / 2;
@@ -88,7 +88,7 @@ export function addMatrixGrid(
     const zBot = z - cellSize / 2 - 0.04;
     const xL = topLeft[0] - cellSize / 2 - 0.04;
     const xR = topLeft[0] + (cols - 1) * cellSize + cellSize / 2 + 0.04;
-    const HL = '#B98A0E';
+    const HL = '#F4D03F';
     const edge = (s: V3, e: V3) =>
       scene.add(new Line3D({ start: t(s), end: t(e), color: HL, opacity: 1 }));
     edge([xL, topLeft[1], zTop], [xR, topLeft[1], zTop]);

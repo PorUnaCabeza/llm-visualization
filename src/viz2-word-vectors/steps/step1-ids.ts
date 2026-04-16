@@ -22,14 +22,14 @@ export function step1Ids(scene: ThreeDScene): string {
   const startX = -totalW / 2;
 
   // Title
-  const title = new Text({ text: '① 词 → Token ID', fontSize: 22, color: '#1F6F89' });
+  const title = new Text({ text: '① 词 → Token ID', fontSize: 22, color: '#58C4DD' });
   title.moveTo(t([0, 0, 4.0]));
   scene.addFixedOrientationMobjects(title);
   scene.add(title);
 
   const sub = new Text({
     text: `词表（vocabulary）是一个字典 {token: id}，大约 ${VOCAB_SIZE.toLocaleString()} 项`,
-    fontSize: 13, color: '#666',
+    fontSize: 13, color: '#dddddd',
   });
   sub.moveTo(t([0, 0, 3.3]));
   scene.addFixedOrientationMobjects(sub);
@@ -48,13 +48,13 @@ export function step1Ids(scene: ThreeDScene): string {
     scene.add(new Arrow3D({
       start: t([x, 0, topZ - 0.5]),
       end:   t([x, 0, midZ + 0.15]),
-      color: '#888',
-      opacity: 0.6,
+      color: '#dddddd',
+      opacity: 0.7,
       shaftRadius: 0.02, tipLength: 0.15, tipRadius: 0.07,
     }));
 
     // ID below
-    const idLabel = new Text({ text: it.id.toString(), fontSize: 16, color: '#1c1c1c' });
+    const idLabel = new Text({ text: it.id.toString(), fontSize: 16, color: '#dddddd' });
     idLabel.moveTo(t([x, 0, midZ - 0.1]));
     scene.addFixedOrientationMobjects(idLabel);
     scene.add(idLabel);
@@ -62,7 +62,7 @@ export function step1Ids(scene: ThreeDScene): string {
 
   // Sample vocab table, placed BELOW the words so it doesn't get clipped in narrow viewports.
   const tableZ0 = -0.5;
-  const vocabTitle = new Text({ text: '词表（示意） vocabulary.json', fontSize: 13, color: '#444' });
+  const vocabTitle = new Text({ text: '词表（示意） vocabulary.json', fontSize: 13, color: '#eeeeee' });
   vocabTitle.moveTo(t([0, 0, tableZ0 + 0.5]));
   scene.addFixedOrientationMobjects(vocabTitle);
   scene.add(vocabTitle);
@@ -82,17 +82,17 @@ export function step1Ids(scene: ThreeDScene): string {
   const eStart = -((entries.length - 1) * eSpacing) / 2;
   entries.forEach((e, i) => {
     const x = eStart + i * eSpacing;
-    const k = new Text({ text: e.token, fontSize: 12, color: '#444' });
+    const k = new Text({ text: e.token, fontSize: 12, color: '#eeeeee' });
     k.moveTo(t([x, 0, tableZ0 - 0.1]));
     scene.addFixedOrientationMobjects(k);
     scene.add(k);
 
-    const sep = new Text({ text: ':', fontSize: 12, color: '#888' });
+    const sep = new Text({ text: ':', fontSize: 12, color: '#bbbbbb' });
     sep.moveTo(t([x, 0, tableZ0 - 0.55]));
     scene.addFixedOrientationMobjects(sep);
     scene.add(sep);
 
-    const v = new Text({ text: e.id.toString(), fontSize: 12, color: '#1F6F89' });
+    const v = new Text({ text: e.id.toString(), fontSize: 12, color: '#58C4DD' });
     v.moveTo(t([x, 0, tableZ0 - 1.0]));
     scene.addFixedOrientationMobjects(v);
     scene.add(v);

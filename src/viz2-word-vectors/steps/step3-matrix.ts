@@ -47,8 +47,8 @@ const CAT_ROW = 4;   // row of 猫 in the matrix — must line up with ROW_LABEL
 
 export function step3Matrix(scene: ThreeDScene, trained: boolean = true): string {
   const CAT_FEATURES = trained ? CAT_FEATURES_TRAINED : CAT_FEATURES_UNTRAINED;
-  const accent     = trained ? '#3F7A26' : '#FC6255';
-  const cardAccent = trained ? '#B98A0E' : '#FC6255';
+  const accent     = trained ? '#83C167' : '#FC6255';
+  const cardAccent = trained ? '#F4D03F' : '#FC6255';
   // ─── Title ───
   const title = new Text({
     text: trained
@@ -64,7 +64,7 @@ export function step3Matrix(scene: ThreeDScene, trained: boolean = true): string
     text: trained
       ? `每个 token 在网络里 = 一个 ${D_MODEL} 维向量（distributed representation）`
       : `每个 token 也是一个 ${D_MODEL} 维向量 —— 但每一维都是随机数，没有意义`,
-    fontSize: 13, color: '#666',
+    fontSize: 13, color: '#dddddd',
   });
   sub.moveTo(t([0, 0, 3.15]));
   scene.addFixedOrientationMobjects(sub);
@@ -92,7 +92,7 @@ export function step3Matrix(scene: ThreeDScene, trained: boolean = true): string
     text: trained
       ? '（示意：每一维 = 一种"语义轴"，模型自己学出来）'
       : '（每一维都是随机初始化的浮点数，还没"学"出含义）',
-    fontSize: 10, color: '#888',
+    fontSize: 10, color: '#dddddd',
   });
   cardHint.moveTo(t([barZeroX - 0.2, 0, cardTopZ - 0.42]));
   scene.addFixedOrientationMobjects(cardHint);
@@ -106,7 +106,7 @@ export function step3Matrix(scene: ThreeDScene, trained: boolean = true): string
     height: 0.015,
     depth: barRowsTopZ - barRowsBotZ,
     center: t([barZeroX, 0, (barRowsTopZ + barRowsBotZ) / 2]),
-    color: '#a89f86',
+    color: '#666666',
     opacity: 0.7,
   }));
 
@@ -118,7 +118,7 @@ export function step3Matrix(scene: ThreeDScene, trained: boolean = true): string
     const lbl = new Text({
       text: `${f.name}  ${f.label}`,
       fontSize: 10,
-      color: '#444',
+      color: '#eeeeee',
     });
     lbl.moveTo(t([cardLabelX, 0, z]));
     scene.addFixedOrientationMobjects(lbl);
@@ -128,7 +128,7 @@ export function step3Matrix(scene: ThreeDScene, trained: boolean = true): string
     const sign = f.value >= 0 ? 1 : -1;
     const len = Math.abs(f.value) * maxBarLen;
     const barCenterX = barZeroX + sign * len / 2;
-    const col = sign > 0 ? '#1F6F89' : '#C04545';
+    const col = sign > 0 ? '#58C4DD' : '#FC6255';
     scene.add(new Box3D({
       width: Math.max(len, 0.02),
       height: 0.22,
@@ -150,7 +150,7 @@ export function step3Matrix(scene: ThreeDScene, trained: boolean = true): string
   const ellZ = cardTopZ - 1.0 - CAT_FEATURES.length * rowHeight;
   const ell = new Text({
     text: `⋮   共 ${D_MODEL} 维`,
-    fontSize: 11, color: '#888',
+    fontSize: 11, color: '#dddddd',
   });
   ell.moveTo(t([barZeroX, 0, ellZ]));
   scene.addFixedOrientationMobjects(ell);
@@ -168,13 +168,13 @@ export function step3Matrix(scene: ThreeDScene, trained: boolean = true): string
   // Bridge text above matrix
   const eHeader = new Text({
     text: '把 50,000 张这样的卡一行一行叠起来 →',
-    fontSize: 11, color: '#444',
+    fontSize: 11, color: '#eeeeee',
   });
   eHeader.moveTo(t([matCenterX, 0, matTopLeft[2] + 0.85]));
   scene.addFixedOrientationMobjects(eHeader);
   scene.add(eHeader);
 
-  const eTitle = new Text({ text: '嵌入矩阵  E', fontSize: 17, color: '#3F7A26' });
+  const eTitle = new Text({ text: '嵌入矩阵  E', fontSize: 17, color: '#83C167' });
   eTitle.moveTo(t([matCenterX, 0, matTopLeft[2] + 0.45]));
   scene.addFixedOrientationMobjects(eTitle);
   scene.add(eTitle);
@@ -220,7 +220,7 @@ export function step3Matrix(scene: ThreeDScene, trained: boolean = true): string
     const lbl = new Text({
       text: word,
       fontSize: 10,
-      color: isCat ? '#B98A0E' : isEllipsis ? '#aaa' : '#666',
+      color: isCat ? '#F4D03F' : isEllipsis ? '#666666' : '#dddddd',
     });
     lbl.moveTo(t([matTopLeft[0] - 0.55, 0, r.rowCenter[2]]));
     scene.addFixedOrientationMobjects(lbl);
@@ -233,7 +233,7 @@ export function step3Matrix(scene: ThreeDScene, trained: boolean = true): string
 
   const shape = new Text({
     text: `[ ${VOCAB_SIZE.toLocaleString()} × ${D_MODEL} ]`,
-    fontSize: 13, color: '#2a2a2a',
+    fontSize: 13, color: '#dddddd',
   });
   shape.moveTo(t([matCenterX, 0, factsZ]));
   scene.addFixedOrientationMobjects(shape);
@@ -242,7 +242,7 @@ export function step3Matrix(scene: ThreeDScene, trained: boolean = true): string
   const paramCount = VOCAB_SIZE * D_MODEL;
   const param = new Text({
     text: `≈ ${(paramCount / 1e6).toFixed(1)}M 可训练参数`,
-    fontSize: 12, color: '#B98A0E',
+    fontSize: 12, color: '#F4D03F',
   });
   param.moveTo(t([matCenterX, 0, factsZ - 0.4]));
   scene.addFixedOrientationMobjects(param);
@@ -266,7 +266,7 @@ export function step3Matrix(scene: ThreeDScene, trained: boolean = true): string
     text: trained
       ? '每一维代表什么？没有人预先定义，反向传播自己"学"出来'
       : '↑ 用顶部按钮切换"训练前 / 训练后"，看 38M 参数从随机变成有意义',
-    fontSize: 11, color: '#666',
+    fontSize: 11, color: '#dddddd',
   });
   note2.moveTo(t([0, 0, noteZ - 0.4]));
   scene.addFixedOrientationMobjects(note2);

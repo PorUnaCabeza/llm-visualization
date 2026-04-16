@@ -5,9 +5,9 @@ import type { V3 } from './utils';
 export const TOKENS = ['我', '饿', '了', '，', '想', '吃', '一', '碗', '热', '腾腾', '的', '___'];
 
 export const TOKEN_COLORS = [
-  '#1F6F89', '#1F6F89', '#1F6F89', '#888888',
-  '#3F7A26', '#3F7A26', '#3F7A26', '#3F7A26',
-  '#3F7A26', '#3F7A26', '#3F7A26', '#B98A0E',
+  '#58C4DD', '#58C4DD', '#58C4DD', '#888888',
+  '#83C167', '#83C167', '#83C167', '#83C167',
+  '#83C167', '#83C167', '#83C167', '#F4D03F',
 ];
 
 export const OUTPUT_PROBS = [
@@ -21,7 +21,7 @@ export const OUTPUT_PROBS = [
 
 // ─── Vector + row geometry ───
 
-export const VEC_DIM = 9;
+export const VEC_DIM = 7;
 export const NUM_SPACING = 0.42;
 export const VEC_HEIGHT = VEC_DIM * NUM_SPACING;
 
@@ -32,9 +32,9 @@ export const START_X = -((TOKEN_COUNT - 1) * TOKEN_SPACING) / 2;
 // ─── Vertical z-levels for the stacked blocks ───
 
 export const EMBED_TOP_Z = 1.5;
-export const BLOCK_GAP = 1.2;
+export const BLOCK_GAP = 0.6;
 export const ATT_TOP_Z = EMBED_TOP_Z - VEC_HEIGHT - BLOCK_GAP;
-export const ATT_HEIGHT = VEC_HEIGHT + 1.6;
+export const ATT_HEIGHT = VEC_HEIGHT + 1.0;
 export const FF_TOP_Z = ATT_TOP_Z - ATT_HEIGHT - BLOCK_GAP;
 export const FF_HEIGHT = ATT_HEIGHT;
 
@@ -52,9 +52,9 @@ export const JOURNEY_WAYPOINTS: {
   label: string;
   layerText: string;
 }[] = [
-  { delta: [ 2.5, 0.3, 1.0], color: '#1F6F89', label: '___（未知）',    layerText: 'Embedding'   },
-  { delta: [ 0.8, 1.2, 1.5], color: '#2C8E6D', label: '跟「吃」有关',   layerText: '第 1~24 层'  },
-  { delta: [-0.5, 0.8, 1.2], color: '#8E4FA0', label: '热的食物',       layerText: '第 25~48 层' },
-  { delta: [-0.8, 0.6, 1.0], color: '#3F7A26', label: '一碗热腾腾的…',  layerText: '第 49~72 层' },
-  { delta: [-0.4, 0.5, 0.8], color: '#B98A0E', label: '→ 面',          layerText: '第 73~96 层' },
+  { delta: [ 2.5, 0.3, 1.0], color: '#58C4DD', label: '___（未知）',    layerText: 'Embedding'   },
+  { delta: [ 0.8, 1.2, 1.5], color: '#3FCB99', label: '跟「吃」有关',   layerText: '第 1~24 层'  },
+  { delta: [-0.5, 0.8, 1.2], color: '#C77DDD', label: '热的食物',       layerText: '第 25~48 层' },
+  { delta: [-0.8, 0.6, 1.0], color: '#83C167', label: '一碗热腾腾的…',  layerText: '第 49~72 层' },
+  { delta: [-0.4, 0.5, 0.8], color: '#F4D03F', label: '→ 面',          layerText: '第 73~96 层' },
 ];

@@ -21,7 +21,7 @@ const trainToggle = document.getElementById('trainToggle') as HTMLButtonElement;
 const scene = new ThreeDScene(container, {
   width: container.clientWidth || window.innerWidth,
   height: container.clientHeight || window.innerHeight,
-  backgroundColor: '#ebe5d4',
+  backgroundColor: '#0a0a0a',
   phi: 90 * (Math.PI / 180),
   theta: -90,
   distance: 24,

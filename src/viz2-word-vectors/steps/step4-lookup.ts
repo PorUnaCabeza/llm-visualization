@@ -15,14 +15,14 @@ const MAT_ROWS = 12;
 
 export function step4Lookup(scene: ThreeDScene): string {
   // Title
-  const title = new Text({ text: '④ 查表 = 选一行', fontSize: 22, color: '#B98A0E' });
+  const title = new Text({ text: '④ 查表 = 选一行', fontSize: 22, color: '#F4D03F' });
   title.moveTo(t([0, 0, 3.8]));
   scene.addFixedOrientationMobjects(title);
   scene.add(title);
 
   const sub = new Text({
     text: 'one_hot(id) · E  ≡  E[id]   — 数学是乘法，代码就是一次行索引',
-    fontSize: 13, color: '#666',
+    fontSize: 13, color: '#dddddd',
   });
   sub.moveTo(t([0, 0, 3.15]));
   scene.addFixedOrientationMobjects(sub);
@@ -39,7 +39,7 @@ export function step4Lookup(scene: ThreeDScene): string {
     const isLit = r === HIGHLIGHT_ROW;
     const val = isLit ? '1' : '0';
     const col = isLit ? '#F4D03F' : '#444';
-    const boxColor = isLit ? '#F4D03F' : '#bfb6a0';
+    const boxColor = isLit ? '#F4D03F' : '#555555';
     // Colored square
     scene.add(new Box3D({
       width: cellSize * 0.92, height: cellSize * 0.92, depth: cellSize * 0.92,
@@ -47,17 +47,17 @@ export function step4Lookup(scene: ThreeDScene): string {
       color: boxColor,
       opacity: isLit ? 1.0 : 0.55,
     }));
-    const lbl = new Text({ text: val, fontSize: 11, color: isLit ? '#000' : '#888' });
+    const lbl = new Text({ text: val, fontSize: 11, color: isLit ? '#000000' : '#dddddd' });
     lbl.moveTo(t([onehotX, -0.01, z]));
     scene.addFixedOrientationMobjects(lbl);
     scene.add(lbl);
   }
   // Column header
-  const ohTitle = new Text({ text: 'one_hot(猫)', fontSize: 12, color: '#B98A0E' });
+  const ohTitle = new Text({ text: 'one_hot(猫)', fontSize: 12, color: '#F4D03F' });
   ohTitle.moveTo(t([onehotX, 0, onehotTopZ + 0.6]));
   scene.addFixedOrientationMobjects(ohTitle);
   scene.add(ohTitle);
-  const ohDim = new Text({ text: `长度 ${VOCAB_SIZE.toLocaleString()}`, fontSize: 10, color: '#888' });
+  const ohDim = new Text({ text: `长度 ${VOCAB_SIZE.toLocaleString()}`, fontSize: 10, color: '#dddddd' });
   ohDim.moveTo(t([onehotX, 0, onehotTopZ - cells * cellSize + 0.1]));
   scene.addFixedOrientationMobjects(ohDim);
   scene.add(ohDim);
@@ -76,13 +76,13 @@ export function step4Lookup(scene: ThreeDScene): string {
   const rowInfo = addMatrixGrid(scene, matTopLeft, values, MAT_CELL, HIGHLIGHT_ROW);
 
   // E header
-  const eTitle = new Text({ text: 'E', fontSize: 18, color: '#3F7A26' });
+  const eTitle = new Text({ text: 'E', fontSize: 18, color: '#83C167' });
   eTitle.moveTo(t([matTopLeft[0] + D_VIS * MAT_CELL / 2, 0, matTopLeft[2] + 0.8]));
   scene.addFixedOrientationMobjects(eTitle);
   scene.add(eTitle);
   const eShape = new Text({
     text: `[${VOCAB_SIZE.toLocaleString()} × ${D_MODEL}]`,
-    fontSize: 10, color: '#888',
+    fontSize: 10, color: '#dddddd',
   });
   eShape.moveTo(t([matTopLeft[0] + D_VIS * MAT_CELL / 2, 0, matTopLeft[2] + 0.45]));
   scene.addFixedOrientationMobjects(eShape);
@@ -97,10 +97,10 @@ export function step4Lookup(scene: ThreeDScene): string {
   scene.add(new Arrow3D({
     start: t(arrowStart),
     end:   t([denseTopX - 0.7, 0, rowEnd[2]]),
-    color: '#B98A0E', opacity: 0.9,
+    color: '#F4D03F', opacity: 0.9,
     shaftRadius: 0.025, tipLength: 0.2, tipRadius: 0.08,
   }));
-  const eqLabel = new Text({ text: '=  E[2031]', fontSize: 12, color: '#B98A0E' });
+  const eqLabel = new Text({ text: '=  E[2031]', fontSize: 12, color: '#F4D03F' });
   eqLabel.moveTo(t([(arrowStart[0] + denseTopX - 0.7) / 2, 0, rowEnd[2] + 0.35]));
   scene.addFixedOrientationMobjects(eqLabel);
   scene.add(eqLabel);
@@ -108,9 +108,9 @@ export function step4Lookup(scene: ThreeDScene): string {
   // ─── Right: the dense vector (8 visible dims) ───
   const denseVals = values[HIGHLIGHT_ROW];
   const denseTopZ = 2.0;
-  addVectorColumn(scene, [denseTopX, 0, denseTopZ], denseVals, '#B98A0E', '#B98A0E');
+  addVectorColumn(scene, [denseTopX, 0, denseTopZ], denseVals, '#F4D03F', '#F4D03F');
 
-  const denseTitle = new Text({ text: '"猫" 的稠密向量', fontSize: 13, color: '#B98A0E' });
+  const denseTitle = new Text({ text: '"猫" 的稠密向量', fontSize: 13, color: '#F4D03F' });
   denseTitle.moveTo(t([denseTopX, 0, denseTopZ + 0.55]));
   scene.addFixedOrientationMobjects(denseTitle);
   scene.add(denseTitle);
@@ -124,36 +124,36 @@ export function step4Lookup(scene: ThreeDScene): string {
   const boxX = 3.8;
   const boxZ = 2.2;
 
-  const bt = new Text({ text: '核心事实', fontSize: 14, color: '#444' });
+  const bt = new Text({ text: '核心事实', fontSize: 14, color: '#eeeeee' });
   bt.moveTo(t([boxX, 0, boxZ]));
   scene.addFixedOrientationMobjects(bt);
   scene.add(bt);
 
-  const l1 = new Text({ text: '从 50000 维稀疏', fontSize: 11, color: '#2a2a2a' });
+  const l1 = new Text({ text: '从 50000 维稀疏', fontSize: 11, color: '#eeeeee' });
   l1.moveTo(t([boxX, 0, boxZ - 0.55]));
   scene.addFixedOrientationMobjects(l1);
   scene.add(l1);
 
-  const l2 = new Text({ text: `→ ${D_MODEL} 维稠密`, fontSize: 11, color: '#2a2a2a' });
+  const l2 = new Text({ text: `→ ${D_MODEL} 维稠密`, fontSize: 11, color: '#eeeeee' });
   l2.moveTo(t([boxX, 0, boxZ - 0.95]));
   scene.addFixedOrientationMobjects(l2);
   scene.add(l2);
 
-  const l3 = new Text({ text: '每个维度都学到一个', fontSize: 11, color: '#444' });
+  const l3 = new Text({ text: '每个维度都学到一个', fontSize: 11, color: '#eeeeee' });
   l3.moveTo(t([boxX, 0, boxZ - 1.55]));
   scene.addFixedOrientationMobjects(l3);
   scene.add(l3);
 
-  const l4 = new Text({ text: '"语义坐标"，例如：', fontSize: 11, color: '#444' });
+  const l4 = new Text({ text: '"语义坐标"，例如：', fontSize: 11, color: '#eeeeee' });
   l4.moveTo(t([boxX, 0, boxZ - 1.95]));
   scene.addFixedOrientationMobjects(l4);
   scene.add(l4);
 
   const exs = [
-    { text: 'd1 ≈ 生命 / 无生命', c: '#1F6F89' },
-    { text: 'd2 ≈ 具体 / 抽象',  c: '#3F7A26' },
+    { text: 'd1 ≈ 生命 / 无生命', c: '#58C4DD' },
+    { text: 'd2 ≈ 具体 / 抽象',  c: '#83C167' },
     { text: 'd3 ≈ 大 / 小',       c: '#FC6255' },
-    { text: 'd4 ≈ 积极 / 消极',  c: '#5C3F70' },
+    { text: 'd4 ≈ 积极 / 消极',  c: '#C77DDD' },
   ];
   exs.forEach((e, i) => {
     const lbl = new Text({ text: e.text, fontSize: 10, color: e.c });

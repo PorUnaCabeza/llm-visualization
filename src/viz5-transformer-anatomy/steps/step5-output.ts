@@ -36,12 +36,12 @@ export async function step5Output(scene: ThreeDScene): Promise<string> {
   );
 
   // ─── Unembedding: place vocab words as "stars" near the final tip ───
-  const unembedLbl = new Text({ text: 'Unembedding', fontSize: 14, color: '#B98A0E' });
+  const unembedLbl = new Text({ text: 'Unembedding', fontSize: 20, color: '#F4D03F' });
   unembedLbl.moveTo(t([lastTip[0] - 1.8, lastTip[1] + 0.5, lastTip[2] + 2.2]));
   scene.addFixedOrientationMobjects(unembedLbl);
   scene.add(unembedLbl);
 
-  const unembedEq = new Text({ text: 'logit_w = v · W_U[:, w]', fontSize: 10, color: '#666' });
+  const unembedEq = new Text({ text: 'logit_w = v · W_U[:, w]', fontSize: 14, color: '#bbbbbb' });
   unembedEq.moveTo(t([lastTip[0] - 1.8, lastTip[1] + 0.5, lastTip[2] + 1.7]));
   scene.addFixedOrientationMobjects(unembedEq);
   scene.add(unembedEq);
@@ -75,8 +75,8 @@ export async function step5Output(scene: ThreeDScene): Promise<string> {
     // Word label
     const wordLbl = new Text({
       text: item.word,
-      fontSize: isWinner ? 15 : 13,
-      color: isWinner ? '#B98A0E' : '#1F6F89',
+      fontSize: isWinner ? 20 : 17,
+      color: isWinner ? '#F4D03F' : '#58C4DD',
     });
     wordLbl.moveTo(t([pos[0] + 0.28, pos[1], pos[2] + 0.28]));
     scene.addFixedOrientationMobjects(wordLbl);
@@ -84,7 +84,7 @@ export async function step5Output(scene: ThreeDScene): Promise<string> {
   });
 
   // ─── Transformation arrow → Softmax panel ───
-  const softLabel = new Text({ text: 'Softmax', fontSize: 14, color: '#B98A0E' });
+  const softLabel = new Text({ text: 'Softmax', fontSize: 20, color: '#F4D03F' });
   softLabel.moveTo(t([baseX + 2, 0, baseZ + 1.5]));
   scene.addFixedOrientationMobjects(softLabel);
   scene.add(softLabel);
@@ -92,7 +92,7 @@ export async function step5Output(scene: ThreeDScene): Promise<string> {
   const arrow = new Arrow3D({
     start: t(lastTip),
     end:   t([baseX, 0, baseZ + 0.5]),
-    color: '#B98A0E',
+    color: '#F4D03F',
     shaftRadius: 0.03,
     tipLength: 0.25,
     tipRadius: 0.1,
@@ -116,8 +116,8 @@ export async function step5Output(scene: ThreeDScene): Promise<string> {
 
     const wordLabel = new Text({
       text: item.word,
-      fontSize: 13,
-      color: isWinner ? '#B98A0E' : '#555',
+      fontSize: 17,
+      color: isWinner ? '#F4D03F' : '#dddddd',
     });
     wordLabel.moveTo(t([baseX - 0.7, 0, z]));
     scene.addFixedOrientationMobjects(wordLabel);
@@ -125,8 +125,8 @@ export async function step5Output(scene: ThreeDScene): Promise<string> {
 
     const pctLabel = new Text({
       text: `${Math.round(item.prob * 100)}%`,
-      fontSize: 11,
-      color: isWinner ? '#B98A0E' : '#666',
+      fontSize: 15,
+      color: isWinner ? '#F4D03F' : '#cccccc',
     });
     pctLabel.moveTo(t([baseX + barLen + 0.5, 0, z]));
     scene.addFixedOrientationMobjects(pctLabel);

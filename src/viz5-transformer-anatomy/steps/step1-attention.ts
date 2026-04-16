@@ -13,11 +13,11 @@ import { genVec, seededRandom, t } from '../utils';
 
 // ─── Step 1: Attention block (with Embedding vectors + residual stream + Q/K/V) ───
 
-const ARC_COLORS = ['#7A7A22', '#557722', '#8F6610', '#5A8030', '#A07820'];
-const RES_COLOR = '#B98A0E';
-const Q_COLOR = '#2C8E6D';  // Query
-const K_COLOR = '#1F6F89';  // Key
-const V_COLOR = '#8E4FA0';  // Value
+const ARC_COLORS = ['#CCCC44', '#AACC33', '#DDAA22', '#88BB55', '#EEBB44'];
+const RES_COLOR = '#F4D03F';
+const Q_COLOR = '#3FCB99';  // Query
+const K_COLOR = '#58C4DD';  // Key
+const V_COLOR = '#C77DDD';  // Value
 
 const HIGHLIGHT_IDX = 4;  // "想" — highlighted as the example token
 
@@ -41,10 +41,10 @@ export async function step1Attention(scene: ThreeDScene): Promise<string> {
   scene.add(new Box3D({
     width: blockWidth, height: ATT_HEIGHT, depth: 2.0,
     center: t([0, 0, blockCenterZ]),
-    color: '#889aaa', opacity: 0.35, wireframe: true,
+    color: '#6688aa', opacity: 0.35, wireframe: true,
   }));
 
-  const title = new Text({ text: 'Attention', fontSize: 24, color: '#1F6F89' });
+  const title = new Text({ text: 'Attention', fontSize: 32, color: '#58C4DD' });
   title.moveTo(t([0, 1.5, ATT_TOP_Z + 0.5]));
   scene.addFixedOrientationMobjects(title);
   scene.add(title);
@@ -54,13 +54,13 @@ export async function step1Attention(scene: ThreeDScene): Promise<string> {
     const x = START_X + i * TOKEN_SPACING;
 
     scene.add(new Arrow3D({
-      start: t([x, 0, 3.6]),
+      start: t([x, 0, 2.25]),
       end:   t([x, 0, ATT_TOP_Z + 0.15]),
-      color: '#666666', opacity: 0.5,
-      shaftRadius: 0.02, tipLength: 0.18, tipRadius: 0.07,
+      color: '#888888', opacity: 0.55,
+      shaftRadius: 0.02, tipLength: 0.16, tipRadius: 0.07,
     }));
 
-    addVectorColumn(scene, x, vecTopZ, genVec(200 + i * 31), '#8899aa', '#556677');
+    addVectorColumn(scene, x, vecTopZ, genVec(200 + i * 31), '#cfd8e2', '#7799bb');
   }
 
   // ─── Highlight bracket on "想" ───
@@ -82,7 +82,7 @@ export async function step1Attention(scene: ThreeDScene): Promise<string> {
     scene.add(new Line3D({
       start: t([x, 0, ATT_TOP_Z + 0.3]),
       end:   t([x, 0, ATT_TOP_Z - ATT_HEIGHT]),
-      color: '#555555', opacity: 0.15,
+      color: '#888888', opacity: 0.18,
     }));
   }
 
@@ -124,7 +124,7 @@ export async function step1Attention(scene: ThreeDScene): Promise<string> {
     const x = START_X + i * TOKEN_SPACING;
     scene.add(new Sphere({
       center: t([x, 0, ATT_TOP_Z + 0.3]),
-      radius: 0.09, color: '#1F6F89', opacity: 0.9,
+      radius: 0.09, color: '#58C4DD', opacity: 0.9,
     }));
   }
 
@@ -146,12 +146,12 @@ export async function step1Attention(scene: ThreeDScene): Promise<string> {
 
   // Residual stream side label (to the right of the last token)
   const sideX = START_X + (TOKEN_COUNT - 1) * TOKEN_SPACING + 1.6;
-  const resLbl = new Text({ text: '残差流', fontSize: 13, color: RES_COLOR });
+  const resLbl = new Text({ text: '残差流', fontSize: 18, color: RES_COLOR });
   resLbl.moveTo(t([sideX, 0, blockCenterZ + 0.3]));
   scene.addFixedOrientationMobjects(resLbl);
   scene.add(resLbl);
 
-  const resEq = new Text({ text: 'x ← x + attn(x)', fontSize: 10, color: '#666' });
+  const resEq = new Text({ text: 'x ← x + attn(x)', fontSize: 14, color: '#bbb' });
   resEq.moveTo(t([sideX, 0, blockCenterZ - 0.2]));
   scene.addFixedOrientationMobjects(resEq);
   scene.add(resEq);
@@ -159,17 +159,17 @@ export async function step1Attention(scene: ThreeDScene): Promise<string> {
   // ─── Q / K / V decomposition on the highlighted token ───
   // Small colored badges ABOVE the vector column: the vec gets projected into Q, K, V
   const qkvZ = vecTopZ + 0.55;
-  const qLbl = new Text({ text: 'Q', fontSize: 13, color: Q_COLOR });
+  const qLbl = new Text({ text: 'Q', fontSize: 18, color: Q_COLOR });
   qLbl.moveTo(t([hx - 0.3, 0, qkvZ]));
   scene.addFixedOrientationMobjects(qLbl);
   scene.add(qLbl);
 
-  const kLbl = new Text({ text: 'K', fontSize: 13, color: K_COLOR });
+  const kLbl = new Text({ text: 'K', fontSize: 18, color: K_COLOR });
   kLbl.moveTo(t([hx, 0, qkvZ]));
   scene.addFixedOrientationMobjects(kLbl);
   scene.add(kLbl);
 
-  const vLbl = new Text({ text: 'V', fontSize: 13, color: V_COLOR });
+  const vLbl = new Text({ text: 'V', fontSize: 18, color: V_COLOR });
   vLbl.moveTo(t([hx + 0.3, 0, qkvZ]));
   scene.addFixedOrientationMobjects(vLbl);
   scene.add(vLbl);
@@ -178,42 +178,42 @@ export async function step1Attention(scene: ThreeDScene): Promise<string> {
   const formulaX = START_X - 2.8;
   const formulaZ0 = blockCenterZ + 1.2;
 
-  const fTitle = new Text({ text: '注意力机制', fontSize: 13, color: '#666' });
+  const fTitle = new Text({ text: '注意力机制', fontSize: 18, color: '#dddddd' });
   fTitle.moveTo(t([formulaX, 0, formulaZ0]));
   scene.addFixedOrientationMobjects(fTitle);
   scene.add(fTitle);
 
-  const fQ = new Text({ text: 'Q = x · W_Q  (查询)', fontSize: 10, color: Q_COLOR });
+  const fQ = new Text({ text: 'Q = x · W_Q  (查询)', fontSize: 14, color: Q_COLOR });
   fQ.moveTo(t([formulaX, 0, formulaZ0 - 0.55]));
   scene.addFixedOrientationMobjects(fQ);
   scene.add(fQ);
 
-  const fK = new Text({ text: 'K = x · W_K  (键)',   fontSize: 10, color: K_COLOR });
+  const fK = new Text({ text: 'K = x · W_K  (键)',   fontSize: 14, color: K_COLOR });
   fK.moveTo(t([formulaX, 0, formulaZ0 - 0.95]));
   scene.addFixedOrientationMobjects(fK);
   scene.add(fK);
 
-  const fV = new Text({ text: 'V = x · W_V  (值)',   fontSize: 10, color: V_COLOR });
+  const fV = new Text({ text: 'V = x · W_V  (值)',   fontSize: 14, color: V_COLOR });
   fV.moveTo(t([formulaX, 0, formulaZ0 - 1.35]));
   scene.addFixedOrientationMobjects(fV);
   scene.add(fV);
 
-  const fScore = new Text({ text: '分数_ij = Q_i · K_j', fontSize: 10, color: '#555' });
+  const fScore = new Text({ text: '分数_ij = Q_i · K_j', fontSize: 14, color: '#cccccc' });
   fScore.moveTo(t([formulaX, 0, formulaZ0 - 1.95]));
   scene.addFixedOrientationMobjects(fScore);
   scene.add(fScore);
 
-  const fSoft = new Text({ text: '权重 = softmax(分数)', fontSize: 10, color: '#555' });
+  const fSoft = new Text({ text: '权重 = softmax(分数)', fontSize: 14, color: '#cccccc' });
   fSoft.moveTo(t([formulaX, 0, formulaZ0 - 2.35]));
   scene.addFixedOrientationMobjects(fSoft);
   scene.add(fSoft);
 
-  const fSum = new Text({ text: 'Σ权重 = 1   (每行归一)', fontSize: 9, color: '#777' });
+  const fSum = new Text({ text: 'Σ权重 = 1   (每行归一)', fontSize: 12, color: '#aaaaaa' });
   fSum.moveTo(t([formulaX, 0, formulaZ0 - 2.7]));
   scene.addFixedOrientationMobjects(fSum);
   scene.add(fSum);
 
-  const fOut = new Text({ text: 'attn(x) = Σ 权重_j · V_j', fontSize: 10, color: '#555' });
+  const fOut = new Text({ text: 'attn(x) = Σ 权重_j · V_j', fontSize: 14, color: '#cccccc' });
   fOut.moveTo(t([formulaX, 0, formulaZ0 - 3.3]));
   scene.addFixedOrientationMobjects(fOut);
   scene.add(fOut);

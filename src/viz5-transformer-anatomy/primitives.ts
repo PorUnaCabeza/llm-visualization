@@ -31,14 +31,14 @@ export function addVectorColumn(
   // Numbers
   values.forEach((v, d) => {
     const z = topZ - d * NUM_SPACING;
-    const label = new Text({ text: fmtNum(v), fontSize: 12, color: textColor });
+    const label = new Text({ text: fmtNum(v), fontSize: 16, color: textColor });
     label.moveTo(t([x, yOffset, z]));
     scene.addFixedOrientationMobjects(label);
     scene.add(label);
   });
 
   // "..." tail
-  const dots = new Text({ text: '⋮', fontSize: 10, color: '#888' });
+  const dots = new Text({ text: '⋮', fontSize: 14, color: '#aaa' });
   dots.moveTo(t([x, yOffset, topZ - values.length * NUM_SPACING + 0.05]));
   scene.addFixedOrientationMobjects(dots);
   scene.add(dots);
@@ -99,7 +99,7 @@ export function addResidualBypass(
   scene.add(new Line3D({ start: t([rx, yOffset, bottomZ]), end: t([bx, yOffset, bottomZ]), color, opacity }));
 
   if (showPlus) {
-    const plus = new Text({ text: '⊕', fontSize: 16, color });
+    const plus = new Text({ text: '⊕', fontSize: 22, color });
     plus.moveTo(t([bx - 0.1, yOffset, bottomZ]));
     scene.addFixedOrientationMobjects(plus);
     scene.add(plus);
