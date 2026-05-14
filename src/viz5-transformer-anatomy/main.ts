@@ -84,7 +84,10 @@ async function nextStep() {
   }
 
   try {
-    scene.orbitControls!.setTarget(TARGETS_BY_STEP[currentStep]);
+    const framing = FRAMING_BY_STEP[currentStep];
+    scene.orbitControls!.setTarget(framing.target);
+    const { phi, theta } = scene.getCameraOrientation();
+    scene.setCameraOrientation(phi, theta, framing.distance);
     const info = await steps[currentStep](scene);
     stepInfoEl.textContent = info;
   } catch (e) {
